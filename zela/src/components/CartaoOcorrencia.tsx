@@ -1,0 +1,49 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { db } from '../services/store';
+import { cores } from '../theme/cores';
+import { fontes } from '../theme/tipografia';
+import { Ocorrencia } from '../types';
+import { descreverPrazo, formatarDistancia } from '../utils';
+import { Card } from './Card';
+import { StatusBadge } from './StatusBadge';
+
+export function CartaoOcorrencia({ o, mostrarPrazo }: { o: Ocorrencia; mostrarPrazo?: boolean }) {
+  const router = useRouter();
+  const categoria = db.categorias.find((c) => c.id === o.categoriaId);
+  const os = db.ordens.find((x) => x.id === o.osId);
+  const prazo = os ? descreverPrazo(os.prazoEtapa) : null;
+  return (
+    <Card
+      onPress={() => router.push(`/(cidadao)/ocorrencia/${o.id}` as never)}
+      rotulo={`Abrir ocorrência: ${o.titulo}`}
+    >
+      <View style={styles.topo}>
+        <Ionicons
+          name={(categoria?.icone ?? 'help-outline') as keyof typeof Ionicons.glyphMap}
+          size={18}
+          color={cores.verdeEscuro}
+        />
+        <Text style={styles.categoria}>{categoria?.nome}</Text>
+        <Text style={styles.dist}>{formatarDistancia(o.distanciaM)}</Text>
+      </View>
+      <Text style={styles.titulo}>{o.titulo}</Text>
+      <StatusBadge status={o.status} />
+      {mostrarPrazo && prazo && (
+        <Text style={[styles.prazo, prazo.atrasado && { color: cores.urgente }]}>
+          {prazo.texto}
+        </Text>
+      )}
+    </Card>
+  );
+}
+
+const styles = StyleSheet.create({
+  topo: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  categoria: { flex: 1, fontFamily: fontes.textoMedio, fontSize: 12, color: cores.verdeEscuro },
+  dist: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoSuave },
+  titulo: { fontFamily: fontes.textoNegrito, fontSize: 15, color: cores.texto },
+  prazo: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.laranjaEscuro },
+});
