@@ -1,14 +1,15 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Botao } from '../../src/components/Botao';
 import { Campo } from '../../src/components/Campo';
+import { Marca } from '../../src/components/Marca';
 import { useAuth } from '../../src/context/AuthContext';
 import { cores } from '../../src/theme/cores';
 import { textos } from '../../src/theme/textos';
-import { fontes, tamanhos } from '../../src/theme/tipografia';
+import { espacos, raio } from '../../src/theme/espacos';
+import { fontes, linhas, tamanhos } from '../../src/theme/tipografia';
 
 const ATALHOS = [
   { rotulo: 'Cidadão', email: 'cidadao@zela.com' },
@@ -51,10 +52,7 @@ export default function Login() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.conteudo} keyboardShouldPersistTaps="handled">
-        <View style={styles.logo}>
-          <Ionicons name="home-outline" size={34} color={cores.verde} />
-        </View>
-        <Text style={styles.marca}>Zela</Text>
+        <Marca tamanho={56} comNome />
         <Text style={styles.lema}>
           O cidadão reporta, a cidade prioriza e todo mundo acompanha.
         </Text>
@@ -120,33 +118,31 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  conteudo: { padding: 24, paddingTop: 64, gap: 12 },
-  logo: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    borderWidth: 2,
-    borderColor: cores.verde,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  marca: { fontFamily: fontes.titulo, fontSize: tamanhos.display, color: cores.claro },
+  conteudo: { padding: espacos.xl, paddingTop: espacos.xxl * 2, gap: espacos.md },
   lema: {
-    fontFamily: fontes.texto,
-    fontSize: tamanhos.corpo,
+    fontFamily: fontes.tituloMedio,
+    fontSize: tamanhos.secao,
+    lineHeight: linhas.secao,
     color: cores.textoSobreEscuro,
-    marginBottom: 12,
+    marginTop: espacos.md,
+    marginBottom: espacos.lg,
+    maxWidth: 320,
   },
-  formulario: { backgroundColor: cores.claro, borderRadius: 16, padding: 16, gap: 12 },
+  formulario: {
+    backgroundColor: cores.claro,
+    borderRadius: raio.cartao,
+    padding: espacos.lg,
+    gap: espacos.md,
+  },
   link: {
     fontFamily: fontes.textoMedio,
-    color: cores.verdeEscuro,
+    color: cores.link,
     textAlign: 'center',
     paddingVertical: 12,
     fontSize: tamanhos.apoio,
   },
-  sucesso: { color: cores.verdeEscuro, fontFamily: fontes.textoMedio, fontSize: tamanhos.apoio },
-  atalhos: { gap: 8, marginTop: 8 },
+  sucesso: { color: cores.sucesso, fontFamily: fontes.textoMedio, fontSize: tamanhos.apoio },
+  atalhos: { gap: espacos.sm, marginTop: espacos.sm },
   atalhosTitulo: {
     color: cores.textoSobreEscuro,
     fontFamily: fontes.textoMedio,
