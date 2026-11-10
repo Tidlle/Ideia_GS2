@@ -11,6 +11,8 @@ interface Props {
   carregando?: boolean;
   desabilitado?: boolean;
   grande?: boolean;
+  /** Texto lido pelo leitor de tela, quando difere do título visível. */
+  rotuloAcessivel?: string;
 }
 
 export function Botao({
@@ -20,13 +22,14 @@ export function Botao({
   carregando,
   desabilitado,
   grande,
+  rotuloAcessivel,
 }: Props) {
   const off = desabilitado || carregando;
   const estilo = estilos[variante];
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={titulo}
+      accessibilityLabel={rotuloAcessivel ?? titulo}
       accessibilityState={{ disabled: !!off, busy: !!carregando }}
       onPress={onPress}
       disabled={off}
@@ -52,11 +55,12 @@ const base = StyleSheet.create({
     minHeight: TOQUE_MIN,
     borderRadius: raio.md,
     paddingHorizontal: 16,
+    paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   grande: { minHeight: 56 },
-  texto: { fontFamily: fontes.textoNegrito, fontSize: 15 },
+  texto: { fontFamily: fontes.textoNegrito, fontSize: 15, textAlign: 'center' },
   off: { opacity: 0.5 },
   pressionado: { opacity: 0.85 },
 });

@@ -7,7 +7,7 @@ import { Secao, Tela } from '../../../src/components/Tela';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { calcularIndicadores, listarExecutores } from '../../../src/services/ordens';
 import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { textos } from '../../../src/theme/textos';
 
 export default function Indicadores() {
   const c = useCarga(async () => [
@@ -19,28 +19,23 @@ export default function Indicadores() {
         {([{ exec, ind }]) => {
           const ranking = [...exec].sort((a, b) => b.prazosCumpridosPct - a.prazosCumpridosPct);
           const bairros = [...ind.bairros].sort((a, b) => a.horas - b.horas);
+          const maxHoras = Math.max(...bairros.map((b) => b.horas));
           return (
             <>
-              <Secao titulo="Executores e contratos (por prazos cumpridos)">
+              <Secao titulo="Ranking de executores">
                 {ranking.map((e, i) => (
                   <Card key={e.id}>
-                    <Text
-                      style={{ fontFamily: fontes.textoNegrito, fontSize: 15, color: cores.texto }}
-                    >
+                    <Text style={textos.tituloCartao}>
                       {i + 1}º {e.nome}
                     </Text>
-                    <Text
-                      style={{ fontFamily: fontes.texto, fontSize: 12, color: cores.textoSuave }}
-                    >
-                      {e.contrato}
-                    </Text>
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <Text style={textos.meta}>{e.contrato}</Text>
+                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
+                      <Metrica rotulo="Tempo médio" valor={`${e.tempoMedioHoras} h`} />
                       <Metrica
-                        rotulo="Prazos"
+                        rotulo="No prazo"
                         valor={`${e.prazosCumpridosPct}%`}
                         ruim={e.prazosCumpridosPct < 80}
                       />
-                      <Metrica rotulo="Tempo médio" valor={`${e.tempoMedioHoras} h`} />
                       <Metrica
                         rotulo="Retrabalho"
                         valor={`${e.retrabalhoPct}%`}
@@ -53,9 +48,7 @@ export default function Indicadores() {
               <Secao titulo="Bairros por tempo de resolução">
                 {bairros.map((b, i) => (
                   <Card key={b.bairro}>
-                    <Text
-                      style={{ fontFamily: fontes.textoNegrito, fontSize: 15, color: cores.texto }}
-                    >
+                    <Text style={textos.tituloCartao}>
                       {i + 1}º {b.bairro} — {b.horas} h em média
                     </Text>
                     <View style={{ height: 8, borderRadius: 4, backgroundColor: cores.borda }}>
@@ -63,7 +56,7 @@ export default function Indicadores() {
                         style={{
                           height: 8,
                           borderRadius: 4,
-                          width: `${Math.min(100, b.horas)}%`,
+                          width: `${Math.round((b.horas / maxHoras) * 100)}%`,
                           backgroundColor: b.horas > 72 ? cores.laranja : cores.verde,
                         }}
                       />

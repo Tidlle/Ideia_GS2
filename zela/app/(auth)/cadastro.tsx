@@ -6,7 +6,7 @@ import { Botao } from '../../src/components/Botao';
 import { Campo } from '../../src/components/Campo';
 import { Tela } from '../../src/components/Tela';
 import { cadastrarCidadao } from '../../src/services/usuarios';
-import { cores } from '../../src/theme/cores';
+import { textos } from '../../src/theme/textos';
 
 export default function Cadastro() {
   const router = useRouter();
@@ -63,7 +63,11 @@ export default function Cadastro() {
         erro={erros.confirmacao}
       />
       <Campo rotulo="Bairro" value={f.bairro} onChangeText={set('bairro')} erro={erros.bairro} />
-      {!!erroGeral && <Text style={{ color: cores.urgente }}>{erroGeral}</Text>}
+      {!!erroGeral && (
+        <Text style={textos.erro} accessibilityLiveRegion="polite">
+          {erroGeral}
+        </Text>
+      )}
       <Botao titulo="Cadastrar" onPress={enviar} carregando={carregando} grande />
     </Tela>
   );

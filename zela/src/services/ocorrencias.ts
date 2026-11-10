@@ -1,48 +1,93 @@
-import { emHoras } from '../mocks/datas';
-import { Categoria, EventoOS, Executor, Ocorrencia, OrdemServico, Usuario } from '../types';
-import { atraso } from './atraso';
-import { db, notificar, proximoId } from './store';
+import { Categoria, Executor, Ocorrencia, Usuario } from '../types';
+import { api, ehArquivoLocal, enviarFoto, ErroApi, Pagina } from './api';
+import {
+  ExecutorApi,
+  OcorrenciaApi,
+  paraCategoria,
+  paraExecutor,
+  paraOcorrencia,
+} from './mapeadores';
+import { db, guardar, notificar } from './store';
+
+/**
+ * Centro usado nas buscas por proximidade enquanto o app não envia o GPS do cidadão
+ * (Vila Mariana, bairro da carga de demonstração).
+ */
+const CENTRO_PADRAO = { lat: -23.5893, lng: -46.6347 };
+const RAIO_BUSCA_M = 5000;
+
+/** Fotos já enviadas na triagem: URI local → URL na API (evita enviar a mesma foto duas vezes). */
+const fotosEnviadas = new Map<string, string>();
 
 export const listarCategorias = async (): Promise<Categoria[]> => {
-  await atraso(150);
-  return db.categorias;
+  const r = await api.get<Pagina<Categoria>>('/categorias?size=100&sort=id');
+  const lista = r.content.map(paraCategoria);
+  guardar(db.categorias, lista);
+  return lista;
 };
 
+/** Ocorrências do bairro, da mais próxima para a mais distante. */
 export async function listarOcorrencias(): Promise<Ocorrencia[]> {
-  await atraso();
-  return [...db.ocorrencias].sort((a, b) => a.distanciaM - b.distanciaM);
+  const r = await api.get<Pagina<OcorrenciaApi>>(
+    `/ocorrencias?lat=${CENTRO_PADRAO.lat}&lng=${CENTRO_PADRAO.lng}&raio=${RAIO_BUSCA_M}&size=100`,
+  );
+  return r.content.map(paraOcorrencia);
 }
 
-export async function listarMinhasOcorrencias(autorId: number): Promise<Ocorrencia[]> {
-  await atraso();
-  return db.ocorrencias
-    .filter((o) => o.autorId === autorId)
-    .sort((a, b) => b.criadaEm.localeCompare(a.criadaEm));
+export async function listarMinhasOcorrencias(_autorId?: number): Promise<Ocorrencia[]> {
+  const r = await api.get<Pagina<OcorrenciaApi>>('/ocorrencias/minhas?size=100');
+  return r.content.map(paraOcorrencia);
 }
 
 export async function obterOcorrencia(id: number): Promise<Ocorrencia | undefined> {
-  await atraso(250);
-  return db.ocorrencias.find((o) => o.id === id);
+  try {
+    return paraOcorrencia(await api.get<OcorrenciaApi>(`/ocorrencias/${id}`));
+  } catch (e) {
+    if (e instanceof ErroApi && e.status === 404) return undefined;
+    throw e;
+  }
 }
 
-/** IA simulada: devolve categoria e descrição sugeridas após ~1,5 s. */
-export async function triarFoto(
-  urlFoto: string | undefined,
-): Promise<{ categoriaId: number; descricao: string }> {
-  await atraso(1500);
-  const sorteio = db.categorias[(urlFoto?.length ?? 0) % db.categorias.length];
-  const descricoes: Record<number, string> = {
-    1: 'Poste de iluminação pública apagado, deixando o trecho escuro à noite.',
-    2: 'Buraco no asfalto com risco para veículos e motos.',
-    3: 'Entulho acumulado na calçada, bloqueando a passagem de pedestres.',
-    4: 'Calçada quebrada, com risco de queda para pedestres.',
-    5: 'Árvore com galhos comprometidos próxima à via.',
+/**
+ * IA de verdade (Spring AI + Gemini na API): envia a foto e recebe categoria, descrição e urgência.
+ * Se a IA não reconhecer o problema, categoriaId vem vazio e o cidadão escolhe.
+ */
+export async function triarFoto(uri: string | undefined): Promise<{
+  categoriaId: number | null;
+  descricao: string;
+  urgente: boolean;
+  aviso?: string;
+}> {
+  if (!uri) return { categoriaId: null, descricao: '', urgente: false };
+  const r = await enviarFoto<{
+    fotoUrl: string;
+    categoriaId: number | null;
+    descricao: string;
+    urgente: boolean;
+    aviso: string | null;
+  }>('/ocorrencias/triagem', uri);
+  fotosEnviadas.set(uri, r.fotoUrl);
+  return {
+    categoriaId: r.categoriaId,
+    descricao: r.descricao,
+    urgente: r.urgente,
+    aviso: r.aviso ?? undefined,
   };
-  return { categoriaId: sorteio.id, descricao: descricoes[sorteio.id] };
+}
+
+/** Garante que a foto está na API e devolve a URL dela (envia se ainda estiver só no aparelho). */
+async function fotoNaApi(uri?: string): Promise<string | undefined> {
+  if (!uri) return undefined;
+  if (!ehArquivoLocal(uri)) return uri;
+  const enviada = fotosEnviadas.get(uri);
+  if (enviada) return enviada;
+  const r = await enviarFoto<{ url: string }>('/fotos', uri);
+  fotosEnviadas.set(uri, r.url);
+  return r.url;
 }
 
 export async function criarOcorrencia(dados: {
-  autor: Usuario;
+  autor?: Usuario;
   categoriaId: number;
   descricao: string;
   endereco: string;
@@ -51,129 +96,54 @@ export async function criarOcorrencia(dados: {
   fotoAntesUrl?: string;
   urgente: boolean;
 }): Promise<Ocorrencia> {
-  await atraso(900);
-  const categoria = db.categorias.find((c) => c.id === dados.categoriaId)!;
-  const id = proximoId(db.ocorrencias);
-  const o: Ocorrencia = {
-    id,
-    autorId: dados.autor.id,
+  const fotoAntesUrl = await fotoNaApi(dados.fotoAntesUrl);
+  const r = await api.post<OcorrenciaApi>('/ocorrencias', {
     categoriaId: dados.categoriaId,
-    titulo: `${categoria.nome}: ${dados.endereco || 'local informado'}`,
-    descricaoIA: dados.descricao,
-    bairro: dados.autor.bairro ?? 'Vila Mariana',
-    endereco: dados.endereco || 'Localização por GPS',
+    descricao: dados.descricao,
+    endereco: dados.endereco,
     latitude: dados.latitude,
     longitude: dados.longitude,
-    distanciaM: 0,
-    fotoAntesUrl: dados.fotoAntesUrl,
+    fotoAntesUrl,
     urgente: dados.urgente,
-    status: dados.urgente ? 'URGENTE' : 'AGUARDANDO_CONFIRMACAO',
-    prioridade: dados.urgente ? 5 : categoria.riscoBase,
-    criadaEm: new Date().toISOString(),
-    confirmacoesSim: 0,
-    confirmacoesNao: 0,
-  };
-  db.ocorrencias.unshift(o);
-  if (dados.urgente) {
-    // Caminho de urgência: pula a confirmação e vai direto ao plantão.
-    emitirOSInterna(o, 5, 'Sistema (urgência — plantão)', 4);
-  }
+  });
+  const o = paraOcorrencia(r);
   notificar();
   return o;
 }
 
-export function emitirOSInterna(
-  o: Ocorrencia,
-  executorId: number,
-  quem: string,
-  prazoHoras: number,
-): OrdemServico {
-  const evento: EventoOS = {
-    id: Date.now(),
-    data: new Date().toISOString(),
-    statusNovo: 'EMITIDA',
-    usuario: quem,
-  };
-  const os: OrdemServico = {
-    id: proximoId(db.ordens),
-    ocorrenciaId: o.id,
-    executorId,
-    status: 'EMITIDA',
-    prazoEtapa: emHoras(prazoHoras),
-    criadaEm: new Date().toISOString(),
-    retrabalho: false,
-    timeline: [evento],
-  };
-  db.ordens.push(os);
-  o.osId = os.id;
-  o.status = o.urgente ? 'URGENTE' : 'EM_ATENDIMENTO';
-  return os;
-}
-
 export async function listarParaConfirmar(): Promise<Ocorrencia[]> {
-  await atraso();
-  return db.ocorrencias.filter(
-    (o) => o.status === 'AGUARDANDO_CONFIRMACAO' && !db.respondidas.has(o.id),
+  const r = await api.get<OcorrenciaApi[]>(
+    `/ocorrencias/para-confirmar?lat=${CENTRO_PADRAO.lat}&lng=${CENTRO_PADRAO.lng}`,
   );
+  return r.map(paraOcorrencia);
 }
 
 export async function responderConfirmacao(id: number, aindaExiste: boolean) {
-  await atraso(300);
-  const o = db.ocorrencias.find((x) => x.id === id);
-  if (!o) return;
-  db.respondidas.add(id);
-  if (aindaExiste) {
-    o.confirmacoesSim += 1;
-    o.prioridade = Math.min(5, o.prioridade + 1);
-    if (o.confirmacoesSim >= 3) o.status = 'CONFIRMADA';
-  } else {
-    o.confirmacoesNao += 1;
-    if (o.confirmacoesNao >= 3) {
-      o.status = 'DESCARTADA';
-      o.motivoDescarte = 'Negada pelos vizinhos.';
-    }
-  }
+  await api.post(`/ocorrencias/${id}/confirmacoes`, { aindaExiste });
   notificar();
 }
 
-/** Exceções: ocorrências confirmadas que não tiveram emissão automática. */
+/** Exceções: confirmadas que não tiveram emissão automática (gestor). */
 export async function listarExcecoes(): Promise<Ocorrencia[]> {
-  await atraso();
-  return db.ocorrencias.filter(
-    (o) => !o.osId && !o.urgente && (o.status === 'CONFIRMADA' || o.status === 'EM_TRIAGEM'),
-  );
+  const r = await api.get<Pagina<OcorrenciaApi>>('/ocorrencias/excecoes?size=100');
+  return r.content.map(paraOcorrencia);
 }
 
 export async function sugerirExecutor(categoriaId: number): Promise<Executor | undefined> {
-  await atraso(200);
-  const c = db.categorias.find((x) => x.id === categoriaId);
-  return db.executores.find((e) => e.id === c?.executorResponsavelId);
+  return paraExecutor(await api.get<ExecutorApi>(`/categorias/${categoriaId}/executor-sugerido`));
 }
 
-export async function emitirOS(ocorrenciaId: number, executorId: number, gestor: string) {
-  await atraso(600);
-  const o = db.ocorrencias.find((x) => x.id === ocorrenciaId);
-  if (!o) return;
-  const c = db.categorias.find((x) => x.id === o.categoriaId)!;
-  emitirOSInterna(o, executorId, gestor, c.prazoHoras);
+export async function emitirOS(ocorrenciaId: number, executorId: number, _gestor?: string) {
+  await api.post(`/ocorrencias/${ocorrenciaId}/emitir-os`, { executorId });
   notificar();
 }
 
 export async function encaminharOcorrencia(ocorrenciaId: number, orgao: string, protocolo: string) {
-  await atraso(600);
-  const o = db.ocorrencias.find((x) => x.id === ocorrenciaId);
-  if (!o) return;
-  o.status = 'ENCAMINHADA';
-  o.orgaoEncaminhado = orgao;
-  o.protocoloExterno = protocolo;
+  await api.post(`/ocorrencias/${ocorrenciaId}/encaminhar`, { orgao, protocolo });
   notificar();
 }
 
 export async function descartarOcorrencia(ocorrenciaId: number, justificativa: string) {
-  await atraso(500);
-  const o = db.ocorrencias.find((x) => x.id === ocorrenciaId);
-  if (!o) return;
-  o.status = 'DESCARTADA';
-  o.motivoDescarte = justificativa;
+  await api.post(`/ocorrencias/${ocorrenciaId}/descartar`, { justificativa });
   notificar();
 }

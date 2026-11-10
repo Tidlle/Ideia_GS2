@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { db } from '../services/store';
 import { cores } from '../theme/cores';
+import { textos } from '../theme/textos';
 import { fontes } from '../theme/tipografia';
 import { Ocorrencia } from '../types';
 import { descreverPrazo, formatarDistancia } from '../utils';
@@ -29,12 +30,10 @@ export function CartaoOcorrencia({ o, mostrarPrazo }: { o: Ocorrencia; mostrarPr
         <Text style={styles.categoria}>{categoria?.nome}</Text>
         <Text style={styles.dist}>{formatarDistancia(o.distanciaM)}</Text>
       </View>
-      <Text style={styles.titulo}>{o.titulo}</Text>
+      <Text style={textos.tituloCartao}>{o.titulo}</Text>
       <StatusBadge status={o.status} />
       {mostrarPrazo && prazo && (
-        <Text style={[styles.prazo, prazo.atrasado && { color: cores.urgente }]}>
-          {prazo.texto}
-        </Text>
+        <Text style={[textos.prazo, prazo.atrasado && textos.atrasado]}>{prazo.texto}</Text>
       )}
     </Card>
   );
@@ -44,6 +43,4 @@ const styles = StyleSheet.create({
   topo: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   categoria: { flex: 1, fontFamily: fontes.textoMedio, fontSize: 12, color: cores.verdeEscuro },
   dist: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoSuave },
-  titulo: { fontFamily: fontes.textoNegrito, fontSize: 15, color: cores.texto },
-  prazo: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.laranjaEscuro },
 });

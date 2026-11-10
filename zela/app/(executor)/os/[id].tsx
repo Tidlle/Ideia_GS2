@@ -13,11 +13,12 @@ import { Secao, Tela } from '../../../src/components/Tela';
 import { Timeline } from '../../../src/components/Timeline';
 import { Vazio } from '../../../src/components/Vazio';
 import { useAuth } from '../../../src/context/AuthContext';
+import { mostrarErro } from '../../../src/services/feedback';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { obterOrdem, aceitarOS, recusarOS } from '../../../src/services/ordens';
 import { db } from '../../../src/services/store';
 import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { textos } from '../../../src/theme/textos';
 import { descreverPrazo } from '../../../src/utils';
 
 const MOTIVOS = [
@@ -48,14 +49,24 @@ export default function DetalheOSExecutor() {
 
   async function aceitar() {
     setEnviando(true);
-    await aceitarOS(os!.id, usuario!.nome);
-    setEnviando(false);
+    try {
+      await aceitarOS(os!.id, usuario!.nome);
+    } catch (e) {
+      mostrarErro(e);
+    } finally {
+      setEnviando(false);
+    }
   }
   async function recusar() {
     setEnviando(true);
-    await recusarOS(os!.id, usuario!.nome, [motivo, detalhe].filter(Boolean).join(': '));
-    setEnviando(false);
-    router.back();
+    try {
+      await recusarOS(os!.id, usuario!.nome, [motivo, detalhe].filter(Boolean).join(': '));
+      router.back();
+    } catch (e) {
+      mostrarErro(e);
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -63,16 +74,18 @@ export default function DetalheOSExecutor() {
       <StatusBadge status={os.status} />
       <Foto rotulo="Antes" uri={o.fotoAntesUrl} />
       <Card>
-        <Text style={t.rotulo}>Categoria</Text>
-        <Text style={t.valor}>{cat?.nome}</Text>
-        <Text style={t.rotulo}>Local</Text>
-        <Text style={t.valor}>
+        <Text style={textos.rotuloInfo}>Categoria</Text>
+        <Text style={textos.valor}>{cat?.nome}</Text>
+        <Text style={textos.rotuloInfo}>Local</Text>
+        <Text style={textos.valor}>
           {o.endereco} ({o.bairro})
         </Text>
-        <Text style={t.rotulo}>Descrição</Text>
-        <Text style={t.valor}>{o.descricaoIA}</Text>
-        <Text style={t.rotulo}>Prazo da etapa</Text>
-        <Text style={[t.valor, prazo.atrasado && { color: cores.urgente }]}>{prazo.texto}</Text>
+        <Text style={textos.rotuloInfo}>Descrição</Text>
+        <Text style={textos.valor}>{o.descricaoIA}</Text>
+        <Text style={textos.rotuloInfo}>Prazo da etapa</Text>
+        <Text style={[textos.valor, prazo.atrasado && { color: cores.urgente }]}>
+          {prazo.texto}
+        </Text>
       </Card>
 
       {podeDecidir && !recusando && (
@@ -83,7 +96,7 @@ export default function DetalheOSExecutor() {
       )}
       {recusando && (
         <Card>
-          <Text style={t.valor}>Motivo da recusa (obrigatório)</Text>
+          <Text style={textos.rotulo}>Motivo da recusa (obrigatório)</Text>
           <Chips opcoes={MOTIVOS} selecionado={motivo} onChange={setMotivo} />
           <Campo rotulo="Detalhes" value={detalhe} onChangeText={setDetalhe} multiline />
           <Botao
@@ -117,8 +130,3 @@ export default function DetalheOSExecutor() {
     </Tela>
   );
 }
-
-const t = {
-  rotulo: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave, marginTop: 4 },
-  valor: { fontFamily: fontes.texto, fontSize: 15, color: cores.texto },
-} as const;

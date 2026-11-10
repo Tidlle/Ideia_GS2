@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { Botao } from '../../../src/components/Botao';
 import { Campo } from '../../../src/components/Campo';
@@ -13,6 +13,7 @@ import { Secao, Tela } from '../../../src/components/Tela';
 import { Timeline } from '../../../src/components/Timeline';
 import { Vazio } from '../../../src/components/Vazio';
 import { useAuth } from '../../../src/context/AuthContext';
+import { mostrarErro } from '../../../src/services/feedback';
 import { useCarga } from '../../../src/hooks/useCarga';
 import {
   aprovarOS,
@@ -23,7 +24,7 @@ import {
 } from '../../../src/services/ordens';
 import { db } from '../../../src/services/store';
 import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { textos } from '../../../src/theme/textos';
 import { descreverPrazo } from '../../../src/utils';
 
 type Modo = 'reprovar' | 'prazo' | 'cancelar' | null;
@@ -47,12 +48,17 @@ export default function DetalheOSGestor() {
   const aberta = !['ENCERRADA', 'ENCAMINHADA', 'RECUSADA'].includes(os.status);
   const podeValidar = os.status === 'CONCLUIDA';
 
-  async function rodar(fn: () => Promise<void>) {
+  async function rodar(fn: () => Promise<unknown>) {
     setEnviando(true);
-    await fn();
-    setEnviando(false);
-    setModo(null);
-    setMotivo('');
+    try {
+      await fn();
+      setModo(null);
+      setMotivo('');
+    } catch (e) {
+      mostrarErro(e);
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -74,32 +80,34 @@ export default function DetalheOSGestor() {
       </Secao>
 
       <Card>
-        <Text style={t.rotulo}>Executor</Text>
-        <Text style={t.valor}>
+        <Text style={textos.rotuloInfo}>Executor</Text>
+        <Text style={textos.valor}>
           {exec?.nome} · {exec?.contrato}
         </Text>
-        <Text style={t.rotulo}>Prazo da etapa</Text>
-        <Text style={[t.valor, prazo.atrasado && { color: cores.urgente }]}>{prazo.texto}</Text>
-        <Text style={t.rotulo}>Confiança da IA (antes/depois)</Text>
-        <Text style={t.valor}>
+        <Text style={textos.rotuloInfo}>Prazo da etapa</Text>
+        <Text style={[textos.valor, prazo.atrasado && { color: cores.urgente }]}>
+          {prazo.texto}
+        </Text>
+        <Text style={textos.rotuloInfo}>Confiança da IA (antes/depois)</Text>
+        <Text style={textos.valor}>
           {os.confiancaIA !== undefined
             ? `${Math.round(os.confiancaIA * 100)}%`
             : 'Ainda sem comparação'}
         </Text>
-        <Text style={t.rotulo}>Local do check-in</Text>
-        <Text style={t.valor}>
+        <Text style={textos.rotuloInfo}>Local do check-in</Text>
+        <Text style={textos.valor}>
           {os.checkinLat !== undefined
             ? `${os.checkinLat.toFixed(4)}, ${os.checkinLng?.toFixed(4)}`
             : 'Sem check-in'}
         </Text>
         {!!os.observacao && (
           <>
-            <Text style={t.rotulo}>Observação do executor</Text>
-            <Text style={t.valor}>{os.observacao}</Text>
+            <Text style={textos.rotuloInfo}>Observação do executor</Text>
+            <Text style={textos.valor}>{os.observacao}</Text>
           </>
         )}
         {!!os.protocoloExterno && (
-          <Text style={t.valor}>Protocolo externo: {os.protocoloExterno}</Text>
+          <Text style={textos.valor}>Protocolo externo: {os.protocoloExterno}</Text>
         )}
       </Card>
 
@@ -137,7 +145,7 @@ export default function DetalheOSGestor() {
       )}
       {modo === 'prazo' && (
         <Card>
-          <Text style={t.valor}>Novo prazo da etapa</Text>
+          <Text style={textos.rotulo}>Novo prazo da etapa</Text>
           <Chips opcoes={PRAZOS} selecionado={horas} onChange={setHoras} />
           <Botao
             titulo="Salvar prazo"
@@ -182,8 +190,3 @@ export default function DetalheOSGestor() {
     </Tela>
   );
 }
-
-const t = StyleSheet.create({
-  rotulo: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave, marginTop: 4 },
-  valor: { fontFamily: fontes.texto, fontSize: 15, color: cores.texto },
-});

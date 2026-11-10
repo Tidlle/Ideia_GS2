@@ -8,11 +8,12 @@ import { Estado } from '../../../src/components/Estado';
 import { StatusBadge } from '../../../src/components/StatusBadge';
 import { Tela } from '../../../src/components/Tela';
 import { useAuth } from '../../../src/context/AuthContext';
+import { mostrarErro } from '../../../src/services/feedback';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { cobrarExecutor, listarEscalonadas, reatribuirOS } from '../../../src/services/ordens';
 import { db } from '../../../src/services/store';
 import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { textos } from '../../../src/theme/textos';
 import { OrdemServico } from '../../../src/types';
 import { horasDeAtraso } from '../../../src/utils';
 
@@ -27,16 +28,11 @@ function CartaoEscalonado({ os, supervisor }: { os: OrdemServico; supervisor: st
 
   return (
     <Card estilo={{ borderColor: cores.laranja }}>
-      <Text style={{ fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave }}>
-        OS #{os.id}
-      </Text>
-      <Text style={{ fontFamily: fontes.textoNegrito, fontSize: 15, color: cores.texto }}>
-        {o?.titulo}
-      </Text>
+      <Text style={textos.id}>OS #{os.id}</Text>
+      <Text style={textos.tituloCartao}>{o?.titulo}</Text>
+      <Text style={textos.meta}>{e?.nome}</Text>
       <StatusBadge status={os.status} />
-      <Text style={{ fontFamily: fontes.texto, fontSize: 13, color: cores.texto }}>
-        Etapa: {os.status} · Atraso: {atrasoH} h · Executor: {e?.nome}
-      </Text>
+      <Text style={[textos.prazo, textos.atrasado]}>Atrasada há {atrasoH} h</Text>
       {!reatribuindo ? (
         <>
           <Botao
@@ -45,9 +41,14 @@ function CartaoEscalonado({ os, supervisor }: { os: OrdemServico; supervisor: st
             desabilitado={cobrado}
             onPress={async () => {
               setEnviando(true);
-              await cobrarExecutor(os.id, supervisor);
-              setEnviando(false);
-              setCobrado(true);
+              try {
+                await cobrarExecutor(os.id, supervisor);
+                setCobrado(true);
+              } catch (e) {
+                mostrarErro(e);
+              } finally {
+                setEnviando(false);
+              }
             }}
           />
           <Botao titulo="Reatribuir" variante="contorno" onPress={() => setReatribuindo(true)} />
@@ -64,9 +65,14 @@ function CartaoEscalonado({ os, supervisor }: { os: OrdemServico; supervisor: st
             carregando={enviando}
             onPress={async () => {
               setEnviando(true);
-              await reatribuirOS(os.id, supervisor, Number(novo));
-              setEnviando(false);
-              setReatribuindo(false);
+              try {
+                await reatribuirOS(os.id, supervisor, Number(novo));
+                setReatribuindo(false);
+              } catch (e) {
+                mostrarErro(e);
+              } finally {
+                setEnviando(false);
+              }
             }}
           />
           <Botao titulo="Voltar" variante="contorno" onPress={() => setReatribuindo(false)} />

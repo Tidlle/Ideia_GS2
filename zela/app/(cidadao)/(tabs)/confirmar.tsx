@@ -6,6 +6,7 @@ import { Card } from '../../../src/components/Card';
 import { Estado } from '../../../src/components/Estado';
 import { Foto } from '../../../src/components/Foto';
 import { Tela } from '../../../src/components/Tela';
+import { mostrarErro } from '../../../src/services/feedback';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { listarParaConfirmar, responderConfirmacao } from '../../../src/services/ocorrencias';
 import { cores } from '../../../src/theme/cores';
@@ -18,8 +19,13 @@ export default function Confirmar() {
 
   async function responder(id: number, sim: boolean) {
     setEnviando(id);
-    await responderConfirmacao(id, sim);
-    setEnviando(null);
+    try {
+      await responderConfirmacao(id, sim);
+    } catch (e) {
+      mostrarErro(e);
+    } finally {
+      setEnviando(null);
+    }
   }
 
   return (

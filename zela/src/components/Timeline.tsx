@@ -4,7 +4,7 @@ import { cores } from '../theme/cores';
 import { fontes } from '../theme/tipografia';
 import { EventoOS } from '../types';
 import { formatarData } from '../utils';
-import { StatusBadge } from './StatusBadge';
+import { infoStatus, StatusBadge } from './StatusBadge';
 
 export function Timeline({ eventos }: { eventos: EventoOS[] }) {
   const ordenados = [...eventos].sort((a, b) => a.data.localeCompare(b.data));
@@ -13,7 +13,7 @@ export function Timeline({ eventos }: { eventos: EventoOS[] }) {
       {ordenados.map((e, i) => (
         <View key={e.id} style={styles.linha}>
           <View style={styles.trilho}>
-            <View style={styles.ponto} />
+            <View style={[styles.ponto, { backgroundColor: infoStatus(e.statusNovo).forte }]} />
             {i < ordenados.length - 1 && <View style={styles.fio} />}
           </View>
           <View style={styles.conteudo}>
@@ -32,7 +32,7 @@ export function Timeline({ eventos }: { eventos: EventoOS[] }) {
 const styles = StyleSheet.create({
   linha: { flexDirection: 'row', gap: 12 },
   trilho: { alignItems: 'center', width: 14 },
-  ponto: { width: 12, height: 12, borderRadius: 6, backgroundColor: cores.verde, marginTop: 4 },
+  ponto: { width: 12, height: 12, borderRadius: 6, marginTop: 4 },
   fio: { flex: 1, width: 2, backgroundColor: cores.borda, marginVertical: 2 },
   conteudo: { flex: 1, paddingBottom: 14, gap: 3 },
   meta: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoSuave },

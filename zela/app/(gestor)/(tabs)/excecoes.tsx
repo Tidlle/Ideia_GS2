@@ -9,6 +9,7 @@ import { Estado } from '../../../src/components/Estado';
 import { Foto } from '../../../src/components/Foto';
 import { Tela } from '../../../src/components/Tela';
 import { useAuth } from '../../../src/context/AuthContext';
+import { mostrarErro } from '../../../src/services/feedback';
 import { useCarga } from '../../../src/hooks/useCarga';
 import {
   descartarOcorrencia,
@@ -17,8 +18,7 @@ import {
   listarExcecoes,
 } from '../../../src/services/ocorrencias';
 import { db } from '../../../src/services/store';
-import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { textos } from '../../../src/theme/textos';
 import { Ocorrencia } from '../../../src/types';
 
 type Modo = 'emitir' | 'encaminhar' | 'descartar' | null;
@@ -32,19 +32,22 @@ function CartaoExcecao({ o, gestor }: { o: Ocorrencia; gestor: string }) {
   const [justificativa, setJustificativa] = useState('');
   const [enviando, setEnviando] = useState(false);
 
-  async function rodar(fn: () => Promise<void>) {
+  async function rodar(fn: () => Promise<unknown>) {
     setEnviando(true);
-    await fn();
-    setEnviando(false);
+    try {
+      await fn();
+    } catch (e) {
+      mostrarErro(e);
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
     <Card>
       <Foto rotulo="Antes" uri={o.fotoAntesUrl} altura={100} />
-      <Text style={{ fontFamily: fontes.textoNegrito, fontSize: 15, color: cores.texto }}>
-        {o.titulo}
-      </Text>
-      <Text style={{ fontFamily: fontes.texto, fontSize: 13, color: cores.textoSuave }}>
+      <Text style={textos.tituloCartao}>{o.titulo}</Text>
+      <Text style={textos.meta}>
         {cat.nome} · {o.confirmacoesSim} confirmações ·{' '}
         {cat.emissaoAutomatica ? 'rotina' : 'sem emissão automática'}
       </Text>
@@ -62,7 +65,7 @@ function CartaoExcecao({ o, gestor }: { o: Ocorrencia; gestor: string }) {
       )}
       {modo === 'emitir' && (
         <>
-          <Text style={{ fontFamily: fontes.textoMedio, color: cores.texto }}>
+          <Text style={textos.rotulo}>
             Executor (sugerido:{' '}
             {db.executores.find((e) => e.id === cat.executorResponsavelId)?.nome})
           </Text>

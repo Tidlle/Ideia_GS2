@@ -36,11 +36,10 @@ export function Foto({ uri, rotulo, altura = 160 }: Props) {
 const styles = StyleSheet.create({
   base: { width: '100%', borderRadius: raio.md },
   placeholder: {
-    backgroundColor: '#E3DFD1',
+    backgroundColor: cores.fotoVazia,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    flex: 1,
   },
   texto: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave },
 });

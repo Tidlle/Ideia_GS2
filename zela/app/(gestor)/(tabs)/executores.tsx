@@ -6,8 +6,7 @@ import { Metrica } from '../../../src/components/Metrica';
 import { Tela } from '../../../src/components/Tela';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { listarExecutores } from '../../../src/services/ordens';
-import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { textos } from '../../../src/theme/textos';
 
 const TIPOS = {
   EQUIPE_PROPRIA: 'Equipe própria',
@@ -23,19 +22,15 @@ export default function Executores() {
         {(lista) =>
           lista.map((e) => (
             <Card key={e.id}>
-              <Text style={{ fontFamily: fontes.textoNegrito, fontSize: 15, color: cores.texto }}>
-                {e.nome}
-              </Text>
-              <Text style={{ fontFamily: fontes.texto, fontSize: 13, color: cores.textoSuave }}>
+              <Text style={textos.tituloCartao}>{e.nome}</Text>
+              <Text style={textos.meta}>
                 {TIPOS[e.tipo]} · {e.regiao}
               </Text>
-              <Text style={{ fontFamily: fontes.texto, fontSize: 13, color: cores.textoSuave }}>
-                {e.contrato}
-              </Text>
+              <Text style={textos.meta}>{e.contrato}</Text>
               <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
                 <Metrica rotulo="Tempo médio" valor={`${e.tempoMedioHoras} h`} />
                 <Metrica
-                  rotulo="Prazos cumpridos"
+                  rotulo="No prazo"
                   valor={`${e.prazosCumpridosPct}%`}
                   ruim={e.prazosCumpridosPct < 80}
                 />

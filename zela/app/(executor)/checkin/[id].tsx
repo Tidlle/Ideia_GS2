@@ -9,6 +9,7 @@ import { Carregando } from '../../../src/components/Carregando';
 import { Tela } from '../../../src/components/Tela';
 import { Vazio } from '../../../src/components/Vazio';
 import { useAuth } from '../../../src/context/AuthContext';
+import { mostrarErro } from '../../../src/services/feedback';
 import { useCarga } from '../../../src/hooks/useCarga';
 import {
   distanciaMetros,
@@ -18,6 +19,7 @@ import {
 } from '../../../src/services/ordens';
 import { db } from '../../../src/services/store';
 import { cores } from '../../../src/theme/cores';
+import { textos } from '../../../src/theme/textos';
 import { fontes } from '../../../src/theme/tipografia';
 
 export default function Checkin() {
@@ -58,9 +60,14 @@ export default function Checkin() {
   async function iniciar() {
     if (!pos || distancia === null) return;
     setEnviando(true);
-    await iniciarExecucao(os!.id, usuario!.nome, pos.lat, pos.lng, distancia);
-    setEnviando(false);
-    router.replace(`/(executor)/os/${os!.id}` as never);
+    try {
+      await iniciarExecucao(os!.id, usuario!.nome, pos.lat, pos.lng, distancia);
+      router.replace(`/(executor)/os/${os!.id}` as never);
+    } catch (e) {
+      mostrarErro(e, 'Check-in recusado');
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -72,13 +79,13 @@ export default function Checkin() {
         variante="secundario"
       />
       {!!erro && (
-        <Text style={{ color: cores.urgente, fontFamily: fontes.textoMedio }}>{erro}</Text>
+        <Text style={textos.erro} accessibilityLiveRegion="polite">
+          {erro}
+        </Text>
       )}
 
       <Card>
-        <Text style={{ fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave }}>
-          Simulação para a demonstração (sem GPS real)
-        </Text>
+        <Text style={textos.rotuloInfo}>Simulação para a demonstração (sem GPS real)</Text>
         <Botao
           titulo="Simular: estou no local"
           variante="contorno"
@@ -106,7 +113,7 @@ export default function Checkin() {
               : `Fora do raio: ${Math.round(distancia)} m do local`}
           </Text>
           {!dentro && (
-            <Text style={{ fontFamily: fontes.texto, color: cores.texto }}>
+            <Text style={textos.valor}>
               Aproxime-se do local da ocorrência para liberar o início da execução.
             </Text>
           )}

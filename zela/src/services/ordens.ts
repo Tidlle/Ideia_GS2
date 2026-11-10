@@ -1,71 +1,52 @@
-import { emHoras } from '../mocks/datas';
 import { Executor, Notificacao, OrdemServico, StatusOS } from '../types';
-import { atraso } from './atraso';
-import { db, notificar, proximoId } from './store';
+import { api, ehArquivoLocal, enviarFoto, ErroApi, Pagina } from './api';
+import { ExecutorApi, OrdemApi, paraExecutor, paraOrdem } from './mapeadores';
+import { db, guardar, notificar } from './store';
 
+/** Raio do check-in (a API confere de novo: o app só antecipa o aviso ao executor). */
 export const RAIO_CHECKIN_M = 100;
 
+/** Desempenho dos executores (gestor e supervisor). */
 export const listarExecutores = async (): Promise<Executor[]> => {
-  await atraso();
-  return db.executores;
+  const r = await api.get<ExecutorApi[]>('/indicadores/executores');
+  const lista = r.map(paraExecutor);
+  guardar(db.executores, lista);
+  return lista;
 };
 
 export async function listarOrdens(): Promise<OrdemServico[]> {
-  await atraso();
-  return [...db.ordens].sort((a, b) => b.criadaEm.localeCompare(a.criadaEm));
+  const r = await api.get<Pagina<OrdemApi>>('/ordens?size=100&sort=criadaEm,desc');
+  return r.content.map(paraOrdem);
 }
 
-export async function listarOrdensDoExecutor(executorId: number): Promise<OrdemServico[]> {
-  await atraso();
-  return db.ordens.filter((o) => o.executorId === executorId);
+/** OS da equipe do executor logado (a API descobre a equipe pelo token). */
+export async function listarOrdensDoExecutor(_executorId?: number): Promise<OrdemServico[]> {
+  const r = await api.get<Pagina<OrdemApi>>('/ordens/minhas?size=100');
+  return r.content.map(paraOrdem);
 }
 
+/** Detalhe com timeline. Devolve vazio se a OS não existe ou não pode ser vista por este usuário. */
 export async function obterOrdem(id: number): Promise<OrdemServico | undefined> {
-  await atraso(250);
-  return db.ordens.find((o) => o.id === id);
+  try {
+    return paraOrdem(await api.get<OrdemApi>(`/ordens/${id}`));
+  } catch (e) {
+    if (e instanceof ErroApi && (e.status === 404 || e.status === 403)) return undefined;
+    throw e;
+  }
 }
 
-function mudarStatus(os: OrdemServico, novo: StatusOS, usuario: string, justificativa?: string) {
-  os.timeline.push({
-    id: proximoId(os.timeline),
-    data: new Date().toISOString(),
-    statusAnterior: os.status,
-    statusNovo: novo,
-    usuario,
-    justificativa,
-  });
-  os.status = novo;
-}
-
-function avisar(texto: string) {
-  const n: Notificacao = {
-    id: proximoId(db.notificacoes),
-    texto,
-    data: new Date().toISOString(),
-    lida: false,
-  };
-  db.notificacoes.unshift(n);
-}
-
-const achar = (id: number) => db.ordens.find((o) => o.id === id)!;
-const ocorrenciaDa = (os: OrdemServico) => db.ocorrencias.find((o) => o.id === os.ocorrenciaId)!;
-
-export async function aceitarOS(id: number, quem: string) {
-  await atraso(500);
-  const os = achar(id);
-  mudarStatus(os, 'ACEITA', quem);
-  os.prazoEtapa = emHoras(24);
+async function acao(caminho: string, corpo?: unknown): Promise<OrdemServico> {
+  const os = paraOrdem(await api.post<OrdemApi>(caminho, corpo));
   notificar();
+  return os;
 }
 
-export async function recusarOS(id: number, quem: string, motivo: string) {
-  await atraso(500);
-  const os = achar(id);
-  mudarStatus(os, 'RECUSADA', quem, motivo);
-  notificar();
-}
+export const aceitarOS = (id: number, _quem?: string) => acao(`/ordens/${id}/aceitar`);
 
-/** Distância em metros (fórmula de Haversine). */
+export const recusarOS = (id: number, _quem: string, motivo: string) =>
+  acao(`/ordens/${id}/recusar`, { justificativa: motivo });
+
+/** Distância em metros (fórmula de Haversine), para o aviso antecipado no app. */
 export function distanciaMetros(lat1: number, lng1: number, lat2: number, lng2: number) {
   const R = 6371000;
   const rad = (x: number) => (x * Math.PI) / 180;
@@ -76,156 +57,81 @@ export function distanciaMetros(lat1: number, lng1: number, lat2: number, lng2: 
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-export async function iniciarExecucao(
+/** Check-in: a API confere a distância (até 100 m) e libera a execução. */
+export const iniciarExecucao = (
   id: number,
-  quem: string,
+  _quem: string,
   lat: number,
   lng: number,
-  distancia: number,
-) {
-  await atraso(500);
-  const os = achar(id);
-  os.checkinLat = lat;
-  os.checkinLng = lng;
-  mudarStatus(os, 'EM_EXECUCAO', quem, `Check-in a ${Math.round(distancia)} m do local`);
-  notificar();
-}
+  _distancia?: number,
+) => acao(`/ordens/${id}/checkin`, { latitude: lat, longitude: lng });
 
-/** IA simulada: compara antes e depois e devolve a confiança (0 a 1). */
-export async function compararAntesDepois(): Promise<number> {
-  await atraso(1500);
-  return Math.round((0.78 + Math.random() * 0.2) * 100) / 100;
-}
-
+/**
+ * Conclusão: envia a foto do depois e conclui. A API compara antes e depois com a IA (Gemini)
+ * e devolve a confiança em `confiancaIA` (vazia se a comparação não foi possível).
+ */
 export async function concluirOS(
   id: number,
-  quem: string,
+  _quem: string,
   fotoDepoisUrl: string | undefined,
   observacao: string,
-  confianca: number,
-) {
-  await atraso(600);
-  const os = achar(id);
-  os.fotoDepoisUrl = fotoDepoisUrl;
-  os.observacao = observacao;
-  os.confiancaIA = confianca;
-  mudarStatus(os, 'CONCLUIDA', quem, 'Foto do depois enviada');
-  os.prazoEtapa = emHoras(48); // janela de validação / aceite tácito
-  avisar(`O problema "${ocorrenciaDa(os).titulo}" foi concluído. Confirme a solução.`);
-  notificar();
+): Promise<OrdemServico> {
+  let url = fotoDepoisUrl;
+  if (url && ehArquivoLocal(url)) {
+    url = (await enviarFoto<{ url: string }>('/fotos', url)).url;
+  }
+  return acao(`/ordens/${id}/concluir`, { fotoDepoisUrl: url, observacao });
 }
 
-export async function aprovarOS(id: number, quem: string) {
-  await atraso(500);
-  const os = achar(id);
-  mudarStatus(os, 'VALIDADA', quem);
-  mudarStatus(os, 'ENCERRADA', 'Sistema');
-  ocorrenciaDa(os).status = 'RESOLVIDA';
-  notificar();
-}
+export const aprovarOS = (id: number, _quem?: string) => acao(`/ordens/${id}/aprovar`);
 
-export async function reprovarOS(id: number, quem: string, motivo: string) {
-  await atraso(500);
-  const os = achar(id);
-  os.retrabalho = true;
-  mudarStatus(os, 'REABERTA', quem, motivo);
-  os.prazoEtapa = emHoras(24);
-  notificar();
-}
+export const reprovarOS = (id: number, _quem: string, motivo: string) =>
+  acao(`/ordens/${id}/reprovar`, { justificativa: motivo });
 
-export async function responderSolucao(
+/** O cidadão confirma (encerra) ou contesta (reabre como retrabalho) a solução. */
+export const responderSolucao = (
   id: number,
-  quem: string,
+  _quem: string,
   confirmou: boolean,
   comentario?: string,
-) {
-  await atraso(500);
-  const os = achar(id);
-  os.cidadaoConfirmou = confirmou;
-  if (confirmou) {
-    mudarStatus(os, 'VALIDADA', quem, 'Cidadão confirmou a solução');
-    mudarStatus(os, 'ENCERRADA', 'Sistema');
-    ocorrenciaDa(os).status = 'RESOLVIDA';
-  } else {
-    os.retrabalho = true;
-    mudarStatus(os, 'REABERTA', quem, comentario || 'Cidadão contestou a solução');
-    os.prazoEtapa = emHoras(24);
-  }
-  notificar();
-}
-
-export async function editarPrazoOS(id: number, quem: string, horas: number) {
-  await atraso(400);
-  const os = achar(id);
-  os.prazoEtapa = emHoras(horas);
-  os.timeline.push({
-    id: proximoId(os.timeline),
-    data: new Date().toISOString(),
-    statusNovo: os.status,
-    usuario: quem,
-    justificativa: `Prazo da etapa alterado para ${horas} h`,
+  nota?: number,
+) =>
+  acao(`/ordens/${id}/avaliacao`, {
+    aprovada: confirmou,
+    comentario: comentario || undefined,
+    nota,
   });
+
+export async function editarPrazoOS(id: number, _quem: string, horas: number) {
+  const os = paraOrdem(await api.patch<OrdemApi>(`/ordens/${id}/prazo`, { horas }));
   notificar();
+  return os;
 }
 
-export async function cancelarOS(id: number, quem: string, motivo: string) {
-  await atraso(500);
-  const os = achar(id);
-  mudarStatus(os, 'ENCERRADA', quem, `Cancelada: ${motivo}`);
-  const o = ocorrenciaDa(os);
-  o.osId = undefined;
-  o.status = 'CONFIRMADA';
-  notificar();
-}
+export const cancelarOS = (id: number, _quem: string, motivo: string) =>
+  acao(`/ordens/${id}/cancelar`, { justificativa: motivo });
 
 export async function listarEscalonadas(): Promise<OrdemServico[]> {
-  await atraso();
-  const ativas: StatusOS[] = [
-    'ESCALADA',
-    'EMITIDA',
-    'ACEITA',
-    'EM_EXECUCAO',
-    'CONCLUIDA',
-    'REABERTA',
-  ];
-  return db.ordens.filter(
-    (o) =>
-      o.status === 'ESCALADA' || (ativas.includes(o.status) && new Date(o.prazoEtapa) < new Date()),
-  );
+  const r = await api.get<OrdemApi[]>('/ordens/escalonadas');
+  return r.map(paraOrdem);
 }
 
-export async function cobrarExecutor(id: number, quem: string) {
-  await atraso(500);
-  const os = achar(id);
-  os.timeline.push({
-    id: proximoId(os.timeline),
-    data: new Date().toISOString(),
-    statusNovo: os.status,
-    usuario: quem,
-    justificativa: 'Supervisor cobrou o executor',
-  });
-  notificar();
-}
+export const cobrarExecutor = (id: number, _quem?: string) => acao(`/ordens/${id}/cobrar`);
 
-export async function reatribuirOS(id: number, quem: string, executorId: number) {
-  await atraso(500);
-  const os = achar(id);
-  os.executorId = executorId;
-  mudarStatus(os, 'EMITIDA', quem, 'Reatribuída pelo supervisor');
-  os.prazoEtapa = emHoras(12);
-  notificar();
-}
+export const reatribuirOS = (id: number, _quem: string, executorId: number) =>
+  acao(`/ordens/${id}/reatribuir`, { executorId });
 
 export async function listarNotificacoes(): Promise<Notificacao[]> {
-  await atraso(250);
-  return db.notificacoes;
+  const r = await api.get<Pagina<Notificacao>>('/notificacoes?size=50');
+  return r.content;
 }
 
 export async function marcarNotificacoesLidas() {
-  db.notificacoes.forEach((n) => (n.lida = true));
+  await api.post('/notificacoes/lidas');
   notificar();
 }
 
+/** Etapa aberta com o prazo vencido (mesma regra da API). */
 export function ehAtrasada(os: OrdemServico) {
   const aberta: StatusOS[] = [
     'EMITIDA',
@@ -238,30 +144,26 @@ export function ehAtrasada(os: OrdemServico) {
   return aberta.includes(os.status) && new Date(os.prazoEtapa) < new Date();
 }
 
+interface IndicadoresApi {
+  abertas: number;
+  atrasadas: number;
+  prazosCumpridosPct: number | null;
+  retrabalhoPct: number | null;
+  excecoes: number;
+  bairros: { bairro: string; ocorrencias: number; resolvidas: number; horas: number | null }[];
+}
+
+/** Painel do gestor e do supervisor (GET /indicadores). */
 export async function calcularIndicadores() {
-  await atraso();
-  const abertas = db.ordens.filter(
-    (o) => !['ENCERRADA', 'ENCAMINHADA', 'RECUSADA'].includes(o.status),
-  );
-  const atrasadas = db.ordens.filter(ehAtrasada);
-  const totalExec = db.executores.length;
-  const prazos = Math.round(
-    db.executores.reduce((s, e) => s + e.prazosCumpridosPct, 0) / totalExec,
-  );
-  const retrabalho = Math.round(db.executores.reduce((s, e) => s + e.retrabalhoPct, 0) / totalExec);
-  const bairros = [
-    { bairro: 'Vila Mariana', horas: 38 },
-    { bairro: 'Saúde', horas: 52 },
-    { bairro: 'Ipiranga', horas: 74 },
-    { bairro: 'Jabaquara', horas: 96 },
-  ];
+  const r = await api.get<IndicadoresApi>('/indicadores');
   return {
-    abertas: abertas.length,
-    atrasadas: atrasadas.length,
-    prazosCumpridosPct: prazos,
-    retrabalhoPct: retrabalho,
-    bairros,
-    excecoes: db.ocorrencias.filter((o) => !o.osId && !o.urgente && o.status === 'CONFIRMADA')
-      .length,
+    abertas: r.abertas,
+    atrasadas: r.atrasadas,
+    prazosCumpridosPct: r.prazosCumpridosPct ?? 0,
+    retrabalhoPct: r.retrabalhoPct ?? 0,
+    excecoes: r.excecoes,
+    bairros: r.bairros
+      .filter((b) => b.horas !== null)
+      .map((b) => ({ bairro: b.bairro, horas: Math.round(b.horas as number) })),
   };
 }

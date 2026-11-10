@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { Botao } from '../../../src/components/Botao';
 import { Campo } from '../../../src/components/Campo';
@@ -12,12 +12,13 @@ import { Secao, Tela } from '../../../src/components/Tela';
 import { Timeline } from '../../../src/components/Timeline';
 import { Vazio } from '../../../src/components/Vazio';
 import { useAuth } from '../../../src/context/AuthContext';
+import { mostrarErro } from '../../../src/services/feedback';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { obterOcorrencia } from '../../../src/services/ocorrencias';
 import { obterOrdem, responderSolucao } from '../../../src/services/ordens';
 import { db } from '../../../src/services/store';
 import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { textos } from '../../../src/theme/textos';
 import { descreverPrazo } from '../../../src/utils';
 
 export default function DetalheOcorrencia() {
@@ -43,9 +44,14 @@ export default function DetalheOcorrencia() {
   async function responder(confirmou: boolean) {
     if (!os) return;
     setEnviando(true);
-    await responderSolucao(os.id, usuario!.nome, confirmou, motivo);
-    setEnviando(false);
-    setContestando(false);
+    try {
+      await responderSolucao(os.id, usuario!.nome, confirmou, motivo);
+      setContestando(false);
+    } catch (e) {
+      mostrarErro(e);
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -59,35 +65,35 @@ export default function DetalheOcorrencia() {
         ) : null}
       </View>
       <Card>
-        <Text style={styles.rotulo}>Categoria</Text>
-        <Text style={styles.valor}>{categoria?.nome}</Text>
-        <Text style={styles.rotulo}>Descrição</Text>
-        <Text style={styles.valor}>{o.descricaoIA}</Text>
-        <Text style={styles.rotulo}>Local</Text>
-        <Text style={styles.valor}>{o.endereco}</Text>
-        <Text style={styles.rotulo}>Confirmações dos vizinhos</Text>
-        <Text style={styles.valor}>
+        <Text style={textos.rotuloInfo}>Categoria</Text>
+        <Text style={textos.valor}>{categoria?.nome}</Text>
+        <Text style={textos.rotuloInfo}>Descrição</Text>
+        <Text style={textos.valor}>{o.descricaoIA}</Text>
+        <Text style={textos.rotuloInfo}>Local</Text>
+        <Text style={textos.valor}>{o.endereco}</Text>
+        <Text style={textos.rotuloInfo}>Confirmações dos vizinhos</Text>
+        <Text style={textos.valor}>
           {o.confirmacoesSim} sim · {o.confirmacoesNao} não
         </Text>
         {prazo && (
           <>
-            <Text style={styles.rotulo}>Prazo da etapa</Text>
-            <Text style={[styles.valor, prazo.atrasado && { color: cores.urgente }]}>
+            <Text style={textos.rotuloInfo}>Prazo da etapa</Text>
+            <Text style={[textos.valor, prazo.atrasado && { color: cores.urgente }]}>
               {prazo.texto}
             </Text>
           </>
         )}
         {!!o.orgaoEncaminhado && (
-          <Text style={styles.valor}>
+          <Text style={textos.valor}>
             Encaminhada a {o.orgaoEncaminhado} · protocolo {o.protocoloExterno}
           </Text>
         )}
-        {!!o.motivoDescarte && <Text style={styles.valor}>{o.motivoDescarte}</Text>}
+        {!!o.motivoDescarte && <Text style={textos.valor}>{o.motivoDescarte}</Text>}
       </Card>
 
       {podeAvaliar && (
         <Card escuro>
-          <Text style={[styles.valor, { color: cores.claro }]}>
+          <Text style={[textos.valor, { color: cores.claro }]}>
             O executor concluiu o serviço. Está resolvido?
           </Text>
           {contestando ? (
@@ -97,6 +103,7 @@ export default function DetalheOcorrencia() {
                 value={motivo}
                 onChangeText={setMotivo}
                 multiline
+                sobreEscuro
               />
               <Botao
                 titulo="Enviar contestação"
@@ -104,6 +111,11 @@ export default function DetalheOcorrencia() {
                 onPress={() => responder(false)}
                 carregando={enviando}
                 desabilitado={motivo.trim().length < 5}
+              />
+              <Botao
+                titulo="Cancelar"
+                variante="contornoClaro"
+                onPress={() => setContestando(false)}
               />
             </>
           ) : (
@@ -118,7 +130,7 @@ export default function DetalheOcorrencia() {
               <View style={{ flex: 1 }}>
                 <Botao
                   titulo="Contestar"
-                  variante="contorno"
+                  variante="contornoClaro"
                   onPress={() => setContestando(true)}
                 />
               </View>
@@ -131,14 +143,9 @@ export default function DetalheOcorrencia() {
         {os ? (
           <Timeline eventos={os.timeline} />
         ) : (
-          <Text style={styles.rotulo}>A ordem de serviço ainda não foi emitida.</Text>
+          <Text style={textos.meta}>A ordem de serviço ainda não foi emitida.</Text>
         )}
       </Secao>
     </Tela>
   );
 }
-
-const styles = StyleSheet.create({
-  rotulo: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave, marginTop: 4 },
-  valor: { fontFamily: fontes.texto, fontSize: 15, color: cores.texto },
-});

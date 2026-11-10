@@ -3,17 +3,20 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Image, Linking, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Botao } from '../../../src/components/Botao';
 import { Campo } from '../../../src/components/Campo';
 import { Card } from '../../../src/components/Card';
 import { Chips } from '../../../src/components/Chips';
+import { Foto } from '../../../src/components/Foto';
 import { Secao, Tela } from '../../../src/components/Tela';
 import { useAuth } from '../../../src/context/AuthContext';
+import { mensagemDeErro } from '../../../src/services/feedback';
 import { criarOcorrencia, triarFoto } from '../../../src/services/ocorrencias';
 import { db } from '../../../src/services/store';
 import { cores } from '../../../src/theme/cores';
+import { textos } from '../../../src/theme/textos';
 import { fontes } from '../../../src/theme/tipografia';
 
 // Centro da Vila Mariana — usado quando o GPS não está disponível (ex.: navegador/emulador).
@@ -31,15 +34,24 @@ export default function NovaOcorrencia() {
   const [urgente, setUrgente] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
+  const [aviso, setAviso] = useState('');
 
   async function aposFoto(uri: string) {
     setFoto(uri);
     setCategoriaId(null);
-    setAnalisando(true); // "IA analisando…" por ~1,5 s
-    const r = await triarFoto(uri);
-    setCategoriaId(r.categoriaId);
-    setDescricao(r.descricao);
-    setAnalisando(false);
+    setAviso('');
+    setAnalisando(true); // a API envia a foto ao Gemini (Spring AI)
+    try {
+      const r = await triarFoto(uri);
+      setCategoriaId(r.categoriaId);
+      setDescricao(r.descricao);
+      if (r.urgente) setUrgente(true);
+      setAviso(r.aviso ?? '');
+    } catch (e) {
+      setAviso(`${mensagemDeErro(e)} Escolha a categoria e descreva o problema.`);
+    } finally {
+      setAnalisando(false);
+    }
   }
 
   async function tirarFoto() {
@@ -74,6 +86,7 @@ export default function NovaOcorrencia() {
     if (!foto) return setErro('Adicione uma foto do problema.');
     if (!coord && !endereco.trim()) return setErro('Informe a localização (GPS ou endereço).');
     if (categoriaId === null) return setErro('Aguarde a análise ou escolha uma categoria.');
+    if (!descricao.trim()) return setErro('Descreva o problema.');
     setErro('');
     setEnviando(true);
     try {
@@ -87,8 +100,8 @@ export default function NovaOcorrencia() {
         urgente,
       });
       router.replace('/(cidadao)/minhas');
-    } catch {
-      setErro('Não foi possível enviar. Tente novamente.');
+    } catch (e) {
+      setErro(mensagemDeErro(e));
     } finally {
       setEnviando(false);
     }
@@ -97,9 +110,7 @@ export default function NovaOcorrencia() {
   return (
     <Tela titulo="Reportar problema" subtitulo="Foto, local e a IA faz o resto.">
       <Secao titulo="1. Foto">
-        {foto ? (
-          <Image source={{ uri: foto }} style={styles.foto} accessibilityLabel="Foto do problema" />
-        ) : null}
+        {foto ? <Foto rotulo="do problema" uri={foto} altura={200} /> : null}
         <View style={styles.linha}>
           <View style={{ flex: 1 }}>
             <Botao titulo="Tirar foto" onPress={tirarFoto} variante="secundario" />
@@ -133,17 +144,24 @@ export default function NovaOcorrencia() {
             </View>
           </Card>
         )}
-        {!analisando && categoriaId === null && (
+        {!analisando && !foto && (
           <Text style={styles.suave}>
             Adicione uma foto para a IA sugerir categoria e descrição.
           </Text>
         )}
-        {!analisando && categoriaId !== null && (
+        {!analisando && !!foto && (
           <>
-            <Text style={styles.suave}>Sugestão da IA — você pode editar:</Text>
+            {!!aviso && (
+              <Text style={styles.texto} accessibilityLiveRegion="polite">
+                {aviso}
+              </Text>
+            )}
+            <Text style={styles.suave}>
+              {categoriaId !== null ? 'Sugestão da IA — você pode editar:' : 'Escolha a categoria:'}
+            </Text>
             <Chips
               opcoes={db.categorias.map((c) => ({ valor: String(c.id), rotulo: c.nome }))}
-              selecionado={String(categoriaId)}
+              selecionado={categoriaId !== null ? String(categoriaId) : ''}
               onChange={(v) => setCategoriaId(Number(v))}
             />
             <Campo rotulo="Descrição" value={descricao} onChangeText={setDescricao} multiline />
@@ -160,7 +178,10 @@ export default function NovaOcorrencia() {
             <Switch
               value={urgente}
               onValueChange={setUrgente}
-              trackColor={{ true: cores.urgente }}
+              trackColor={{ true: cores.urgente, false: cores.borda }}
+              thumbColor={cores.branco}
+              // só no react-native-web: sem isso o botão fica verde-azulado quando ligado
+              {...({ activeThumbColor: cores.branco } as object)}
               accessibilityLabel="É urgente?"
             />
           </View>
@@ -195,7 +216,7 @@ export default function NovaOcorrencia() {
       </Secao>
 
       {!!erro && (
-        <Text style={styles.erro} accessibilityLiveRegion="polite">
+        <Text style={textos.erro} accessibilityLiveRegion="polite">
           {erro}
         </Text>
       )}
@@ -211,11 +232,9 @@ export default function NovaOcorrencia() {
 }
 
 const styles = StyleSheet.create({
-  foto: { width: '100%', height: 200, borderRadius: 12 },
   linha: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   texto: { fontFamily: fontes.texto, fontSize: 14, color: cores.texto },
   suave: { fontFamily: fontes.texto, fontSize: 13, color: cores.textoSuave },
-  erro: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.urgente },
   alertaUrgente: {
     flexDirection: 'row',
     gap: 10,

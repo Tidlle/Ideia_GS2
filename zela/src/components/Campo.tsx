@@ -2,20 +2,23 @@ import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native'
 
 import { cores } from '../theme/cores';
 import { raio, TOQUE_MIN } from '../theme/espacos';
+import { textos } from '../theme/textos';
 import { fontes } from '../theme/tipografia';
 
 interface Props extends TextInputProps {
   rotulo: string;
   erro?: string;
+  /** Use quando o campo estiver sobre um cartão escuro. */
+  sobreEscuro?: boolean;
 }
 
-export function Campo({ rotulo, erro, style, ...resto }: Props) {
+export function Campo({ rotulo, erro, sobreEscuro, style, ...resto }: Props) {
   return (
     <View style={styles.grupo}>
-      <Text style={styles.rotulo}>{rotulo}</Text>
+      <Text style={[textos.rotulo, sobreEscuro && { color: cores.claro }]}>{rotulo}</Text>
       <TextInput
         accessibilityLabel={rotulo}
-        placeholderTextColor="#7A857F"
+        placeholderTextColor={cores.placeholder}
         style={[styles.input, !!erro && styles.inputErro, resto.multiline && styles.multi, style]}
         {...resto}
       />
@@ -30,7 +33,6 @@ export function Campo({ rotulo, erro, style, ...resto }: Props) {
 
 const styles = StyleSheet.create({
   grupo: { gap: 4 },
-  rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.texto },
   input: {
     minHeight: TOQUE_MIN,
     borderWidth: 1,
@@ -44,5 +46,5 @@ const styles = StyleSheet.create({
   },
   multi: { minHeight: 90, paddingTop: 10, textAlignVertical: 'top' },
   inputErro: { borderColor: cores.urgente },
-  erro: { fontFamily: fontes.texto, fontSize: 12, color: cores.urgente },
+  erro: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.urgente },
 });

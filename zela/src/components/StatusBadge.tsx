@@ -30,23 +30,28 @@ const MAPA: Record<string, { texto: string; tom: Tom }> = {
   ATRASADA: { texto: 'Atrasada', tom: 'urgente' },
 };
 
-const TONS: Record<Tom, { fundo: string; texto: string }> = {
-  verde: { fundo: '#DDF3E6', texto: cores.verdeEscuro },
-  laranja: { fundo: '#FBE8D6', texto: cores.laranjaEscuro },
-  urgente: { fundo: '#F7DDD8', texto: cores.urgente },
-  neutro: { fundo: '#E8E5DA', texto: cores.textoSuave },
+export const TONS: Record<Tom, { fundo: string; cor: string; forte: string }> = {
+  verde: { fundo: cores.verdeFundo, cor: cores.verdeEscuro, forte: cores.verde },
+  laranja: { fundo: cores.laranjaFundo, cor: cores.laranjaEscuro, forte: cores.laranja },
+  urgente: { fundo: cores.urgenteFundo, cor: cores.urgente, forte: cores.urgente },
+  neutro: { fundo: cores.neutroFundo, cor: cores.textoSuave, forte: cores.textoSuave },
 };
+
+/** Texto e tom de um status (usado pelo selo e pela linha do tempo). */
+export function infoStatus(status: string) {
+  const m = MAPA[status] ?? { texto: status, tom: 'neutro' as Tom };
+  return { texto: m.texto, ...TONS[m.tom] };
+}
 
 /** Sempre mostra o texto do status: a cor nunca é o único indicador. */
 export function StatusBadge({ status }: { status: string }) {
-  const m = MAPA[status] ?? { texto: status, tom: 'neutro' as Tom };
-  const t = TONS[m.tom];
+  const t = infoStatus(status);
   return (
     <View
       style={[styles.badge, { backgroundColor: t.fundo }]}
-      accessibilityLabel={`Status: ${m.texto}`}
+      accessibilityLabel={`Status: ${t.texto}`}
     >
-      <Text style={[styles.texto, { color: t.texto }]}>{m.texto}</Text>
+      <Text style={[styles.texto, { color: t.cor }]}>{t.texto}</Text>
     </View>
   );
 }

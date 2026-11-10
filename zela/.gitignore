@@ -5,3 +5,6 @@ web-build/
 *.log
 .DS_Store
 expo-env.d.ts
+
+# Configuração local da URL da API (veja .env.example)
+.env

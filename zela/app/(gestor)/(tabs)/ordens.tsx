@@ -9,8 +9,7 @@ import { Tela } from '../../../src/components/Tela';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { ehAtrasada, listarOrdens } from '../../../src/services/ordens';
 import { db } from '../../../src/services/store';
-import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { textos } from '../../../src/theme/textos';
 
 const STATUS = [
   { valor: 'TODOS', rotulo: 'Todos' },
@@ -43,10 +42,9 @@ export default function Ordens() {
 
   return (
     <Tela titulo="Ordens de serviço">
+      <Text style={textos.rotulo}>Status</Text>
       <Chips opcoes={STATUS} selecionado={filtro} onChange={setFiltro} />
-      <Text style={{ fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave }}>
-        Executor
-      </Text>
+      <Text style={textos.rotulo}>Executor</Text>
       <Chips
         opcoes={[
           { valor: 'TODOS', rotulo: 'Todos' },
@@ -55,9 +53,7 @@ export default function Ordens() {
         selecionado={executor}
         onChange={setExecutor}
       />
-      <Text style={{ fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave }}>
-        Bairro
-      </Text>
+      <Text style={textos.rotulo}>Bairro</Text>
       <Chips
         opcoes={[
           { valor: 'TODOS', rotulo: 'Todos' },

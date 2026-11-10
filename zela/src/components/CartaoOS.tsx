@@ -2,8 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { db } from '../services/store';
 import { ehAtrasada } from '../services/ordens';
-import { cores } from '../theme/cores';
-import { fontes } from '../theme/tipografia';
+import { textos } from '../theme/textos';
 import { OrdemServico } from '../types';
 import { descreverPrazo } from '../utils';
 import { Card } from './Card';
@@ -21,29 +20,24 @@ export function CartaoOS({ os, onPress, mostrarExecutor }: Props) {
   const prazo = descreverPrazo(os.prazoEtapa);
   return (
     <Card onPress={onPress} rotulo={`Abrir OS ${os.id}: ${o?.titulo}`}>
-      <Text style={styles.id}>OS #{os.id}</Text>
-      <Text style={styles.titulo}>{o?.titulo}</Text>
-      {mostrarExecutor && <Text style={styles.meta}>{e?.nome}</Text>}
-      <Text style={styles.meta}>
+      <Text style={textos.id}>OS #{os.id}</Text>
+      <Text style={textos.tituloCartao}>{o?.titulo}</Text>
+      {mostrarExecutor && <Text style={textos.meta}>{e?.nome}</Text>}
+      <Text style={textos.meta}>
         {o?.bairro} · {o?.endereco}
       </Text>
-      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+      <View style={styles.selos}>
         <StatusBadge status={os.status} />
         {ehAtrasada(os) && os.status !== 'ESCALADA' && <StatusBadge status="ATRASADA" />}
         {os.retrabalho && <StatusBadge status="REABERTA" />}
       </View>
       {!['ENCERRADA', 'ENCAMINHADA', 'RECUSADA'].includes(os.status) && (
-        <Text style={[styles.prazo, prazo.atrasado && { color: cores.urgente }]}>
-          {prazo.texto}
-        </Text>
+        <Text style={[textos.prazo, prazo.atrasado && textos.atrasado]}>{prazo.texto}</Text>
       )}
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  id: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave },
-  titulo: { fontFamily: fontes.textoNegrito, fontSize: 15, color: cores.texto },
-  meta: { fontFamily: fontes.texto, fontSize: 13, color: cores.textoSuave },
-  prazo: { fontFamily: fontes.titulo, fontSize: 15, color: cores.laranjaEscuro },
+  selos: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', alignItems: 'center' },
 });

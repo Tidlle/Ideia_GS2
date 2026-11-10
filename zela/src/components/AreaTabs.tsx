@@ -25,11 +25,10 @@ export function AreaTabs({ abas }: Props) {
         headerRight: () => <CabecalhoAcoes />,
         tabBarActiveTintColor: cores.verdeEscuro,
         tabBarInactiveTintColor: cores.textoSuave,
-        tabBarStyle: {
-          backgroundColor: cores.cartao,
-          borderTopColor: cores.borda,
-          minHeight: 60,
-        },
+        tabBarStyle:
+          abas.length > 1
+            ? { backgroundColor: cores.cartao, borderTopColor: cores.borda, minHeight: 60 }
+            : { display: 'none' },
         tabBarLabelStyle: { fontFamily: fontes.textoMedio, fontSize: 11 },
       }}
     >

@@ -16,7 +16,8 @@ export default function Notificacoes() {
   useEffect(() => {
     // marca como lidas ao sair da tela
     return () => {
-      marcarNotificacoesLidas();
+      // Sem tela para mostrar o erro (o usuário já saiu): se falhar, ficam como não lidas.
+      marcarNotificacoesLidas().catch(() => undefined);
     };
   }, []);
 

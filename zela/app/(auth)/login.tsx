@@ -7,6 +7,7 @@ import { Botao } from '../../src/components/Botao';
 import { Campo } from '../../src/components/Campo';
 import { useAuth } from '../../src/context/AuthContext';
 import { cores } from '../../src/theme/cores';
+import { textos } from '../../src/theme/textos';
 import { fontes } from '../../src/theme/tipografia';
 
 const ATALHOS = [
@@ -83,7 +84,7 @@ export default function Login() {
             placeholder="••••••"
           />
           {!!erroGeral && (
-            <Text style={styles.erro} accessibilityLiveRegion="polite">
+            <Text style={textos.erro} accessibilityLiveRegion="polite">
               {erroGeral}
             </Text>
           )}
@@ -94,12 +95,13 @@ export default function Login() {
         </View>
 
         <View style={styles.atalhos}>
-          <Text style={styles.atalhosTitulo}>Atalhos para a demonstração (senha 123456)</Text>
+          <Text style={styles.atalhosTitulo}>Entrar como (demonstração, senha 123456)</Text>
           <View style={styles.atalhosLinha}>
             {ATALHOS.map((a) => (
               <View key={a.rotulo} style={{ flexGrow: 1, flexBasis: '45%' }}>
                 <Botao
-                  titulo={`Entrar como ${a.rotulo}`}
+                  titulo={a.rotulo}
+                  rotuloAcessivel={`Entrar como ${a.rotulo}`}
                   variante="contornoClaro"
                   onPress={() => {
                     setEmail(a.email);
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   marca: { fontFamily: fontes.titulo, fontSize: 44, color: cores.claro },
-  lema: { fontFamily: fontes.texto, fontSize: 15, color: '#C7D1CB', marginBottom: 12 },
+  lema: { fontFamily: fontes.texto, fontSize: 15, color: cores.textoSobreEscuro, marginBottom: 12 },
   formulario: { backgroundColor: cores.claro, borderRadius: 16, padding: 16, gap: 12 },
   link: {
     fontFamily: fontes.textoMedio,
@@ -138,9 +140,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 14,
   },
-  erro: { color: cores.urgente, fontFamily: fontes.textoMedio, fontSize: 13 },
   sucesso: { color: cores.verdeEscuro, fontFamily: fontes.textoMedio, fontSize: 13 },
   atalhos: { gap: 8, marginTop: 8 },
-  atalhosTitulo: { color: '#C7D1CB', fontFamily: fontes.textoMedio, fontSize: 12 },
+  atalhosTitulo: { color: cores.textoSobreEscuro, fontFamily: fontes.textoMedio, fontSize: 12 },
   atalhosLinha: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 });

@@ -23,7 +23,10 @@ export function Metrica({
       >
         {valor}
       </Text>
-      <Text style={{ fontFamily: fontes.texto, fontSize: 11, color: cores.textoSuave }}>
+      <Text
+        numberOfLines={1}
+        style={{ fontFamily: fontes.texto, fontSize: 11, color: cores.textoSuave }}
+      >
         {rotulo}
       </Text>
     </View>
