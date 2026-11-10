@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '../../../src/components/Card';
 import { Estado } from '../../../src/components/Estado';
@@ -6,7 +6,9 @@ import { Metrica } from '../../../src/components/Metrica';
 import { Tela } from '../../../src/components/Tela';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { listarExecutores } from '../../../src/services/ordens';
+import { espacos } from '../../../src/theme/espacos';
 import { textos } from '../../../src/theme/textos';
+import { formatarHoras } from '../../../src/utils';
 
 const TIPOS = {
   EQUIPE_PROPRIA: 'Equipe própria',
@@ -27,19 +29,24 @@ export default function Executores() {
                 {TIPOS[e.tipo]} · {e.regiao}
               </Text>
               <Text style={textos.meta}>{e.contrato}</Text>
-              <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
-                <Metrica rotulo="Tempo médio" valor={`${e.tempoMedioHoras} h`} />
+              <View style={styles.metricas}>
+                <Metrica rotulo="Tempo médio" valor={formatarHoras(e.tempoMedioHoras)} />
                 <Metrica
                   rotulo="No prazo"
                   valor={`${e.prazosCumpridosPct}%`}
                   ruim={e.prazosCumpridosPct < 80}
                 />
+              </View>
+              <View style={styles.metricas}>
                 <Metrica
                   rotulo="Retrabalho"
                   valor={`${e.retrabalhoPct}%`}
                   ruim={e.retrabalhoPct > 10}
                 />
-                <Metrica rotulo="Avaliação" valor={`${e.avaliacao.toFixed(1)} ★`} />
+                <Metrica
+                  rotulo="Avaliação dos cidadãos"
+                  valor={`${e.avaliacao.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} de 5`}
+                />
               </View>
             </Card>
           ))
@@ -48,3 +55,7 @@ export default function Executores() {
     </Tela>
   );
 }
+
+const styles = StyleSheet.create({
+  metricas: { flexDirection: 'row', gap: espacos.sm, marginTop: espacos.xs },
+});

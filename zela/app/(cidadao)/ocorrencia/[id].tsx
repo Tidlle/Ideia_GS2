@@ -78,9 +78,7 @@ export default function DetalheOcorrencia() {
         {prazo && (
           <>
             <Text style={textos.rotuloInfo}>Prazo da etapa</Text>
-            <Text style={[textos.valor, prazo.atrasado && { color: cores.urgente }]}>
-              {prazo.texto}
-            </Text>
+            <Text style={[textos.valor, prazo.atrasado && textos.atrasado]}>{prazo.texto}</Text>
           </>
         )}
         {!!o.orgaoEncaminhado && (

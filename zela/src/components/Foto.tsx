@@ -3,7 +3,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { cores } from '../theme/cores';
 import { raio } from '../theme/espacos';
-import { fontes } from '../theme/tipografia';
+import { fontes, tamanhos } from '../theme/tipografia';
 
 interface Props {
   uri?: string;
@@ -34,12 +34,12 @@ export function Foto({ uri, rotulo, altura = 160 }: Props) {
 }
 
 const styles = StyleSheet.create({
-  base: { width: '100%', borderRadius: raio.md },
+  base: { width: '100%', borderRadius: raio.foto },
   placeholder: {
     backgroundColor: cores.fotoVazia,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
   },
-  texto: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.textoSuave },
+  texto: { fontFamily: fontes.textoMedio, fontSize: tamanhos.legenda, color: cores.textoSuave },
 });

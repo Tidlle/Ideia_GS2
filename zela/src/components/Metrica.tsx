@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 
 import { cores } from '../theme/cores';
-import { fontes } from '../theme/tipografia';
+import { fontes, tamanhos } from '../theme/tipografia';
 
 export function Metrica({
   rotulo,
@@ -17,15 +17,15 @@ export function Metrica({
       <Text
         style={{
           fontFamily: fontes.titulo,
-          fontSize: 18,
-          color: ruim ? cores.laranjaEscuro : cores.verdeEscuro,
+          fontSize: tamanhos.secao,
+          color: ruim ? cores.atencao : cores.texto,
         }}
       >
         {valor}
       </Text>
       <Text
         numberOfLines={1}
-        style={{ fontFamily: fontes.texto, fontSize: 11, color: cores.textoSuave }}
+        style={{ fontFamily: fontes.texto, fontSize: tamanhos.legenda, color: cores.textoSuave }}
       >
         {rotulo}
       </Text>

@@ -18,3 +18,7 @@ export const formatarDistancia = (m: number) =>
 
 export const horasDeAtraso = (iso: string) =>
   Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 3600000));
+
+/** Horas em formato brasileiro, sem casas decimais a partir de 10 h ("9,5 h", "89 h"). */
+export const formatarHoras = (h: number) =>
+  `${h.toLocaleString('pt-BR', { maximumFractionDigits: h >= 10 ? 0 : 1 })} h`;

@@ -1,8 +1,8 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
 import { cores } from '../theme/cores';
-import { raio, TOQUE_MIN } from '../theme/espacos';
-import { fontes } from '../theme/tipografia';
+import { espacos, raio, TOQUE_MIN } from '../theme/espacos';
+import { fontes, tamanhos } from '../theme/tipografia';
 
 interface Props {
   titulo: string;
@@ -53,28 +53,28 @@ export function Botao({
 const base = StyleSheet.create({
   botao: {
     minHeight: TOQUE_MIN,
-    borderRadius: raio.md,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    borderRadius: raio.controle,
+    paddingHorizontal: espacos.lg,
+    paddingVertical: espacos.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   grande: { minHeight: 56 },
-  texto: { fontFamily: fontes.textoNegrito, fontSize: 15, textAlign: 'center' },
+  texto: { fontFamily: fontes.textoNegrito, fontSize: tamanhos.corpo, textAlign: 'center' },
   off: { opacity: 0.5 },
   pressionado: { opacity: 0.85 },
 });
 
 const estilos = {
-  primario: { caixa: { backgroundColor: cores.verde }, cor: cores.escuro },
+  primario: { caixa: { backgroundColor: cores.acao }, cor: cores.sobreAcao },
   secundario: { caixa: { backgroundColor: cores.escuro }, cor: cores.claro },
-  perigo: { caixa: { backgroundColor: cores.urgente }, cor: cores.branco },
+  perigo: { caixa: { backgroundColor: cores.perigo }, cor: cores.branco },
   contornoClaro: {
-    caixa: { borderWidth: 1.5, borderColor: cores.verde, backgroundColor: 'transparent' },
-    cor: cores.verde,
+    caixa: { borderWidth: 1.5, borderColor: cores.marca, backgroundColor: 'transparent' },
+    cor: cores.marca,
   },
   contorno: {
-    caixa: { borderWidth: 1.5, borderColor: cores.verdeEscuro, backgroundColor: 'transparent' },
-    cor: cores.verdeEscuro,
+    caixa: { borderWidth: 1.5, borderColor: cores.link, backgroundColor: 'transparent' },
+    cor: cores.link,
   },
 };

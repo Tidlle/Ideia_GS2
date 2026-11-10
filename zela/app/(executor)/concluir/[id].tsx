@@ -17,7 +17,7 @@ import { mensagemDeErro } from '../../../src/services/feedback';
 import { concluirOS, obterOrdem } from '../../../src/services/ordens';
 import { cores } from '../../../src/theme/cores';
 import { textos } from '../../../src/theme/textos';
-import { fontes } from '../../../src/theme/tipografia';
+import { fontes, tamanhos } from '../../../src/theme/tipografia';
 
 export default function Concluir() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -62,8 +62,10 @@ export default function Concluir() {
       <Tela titulo="Enviando evidência">
         <Card>
           <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-            <ActivityIndicator color={cores.verde} />
-            <Text style={{ fontFamily: fontes.texto, fontSize: 15, color: cores.texto }}>
+            <ActivityIndicator color={cores.marca} />
+            <Text
+              style={{ fontFamily: fontes.texto, fontSize: tamanhos.corpo, color: cores.texto }}
+            >
               IA comparando antes e depois…
             </Text>
           </View>
@@ -75,13 +77,19 @@ export default function Concluir() {
     return (
       <Tela titulo="OS concluída">
         <Card escuro>
-          <Ionicons name="checkmark-circle" size={36} color={cores.verde} />
-          <Text style={{ fontFamily: fontes.titulo, fontSize: 20, color: cores.claro }}>
+          <Ionicons name="checkmark-circle" size={36} color={cores.marca} />
+          <Text style={{ fontFamily: fontes.titulo, fontSize: tamanhos.secao, color: cores.claro }}>
             {confianca !== null
               ? `Confiança da IA: ${Math.round(confianca * 100)}%`
               : 'Comparação da IA indisponível'}
           </Text>
-          <Text style={{ fontFamily: fontes.texto, fontSize: 14, color: cores.textoSobreEscuro }}>
+          <Text
+            style={{
+              fontFamily: fontes.texto,
+              fontSize: tamanhos.corpo,
+              color: cores.textoSobreEscuro,
+            }}
+          >
             Agora o gestor e o cidadão podem validar. Sem contestação em 48 h, com IA confiante,
             vale o aceite tácito.
           </Text>

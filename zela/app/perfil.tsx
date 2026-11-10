@@ -6,7 +6,7 @@ import { Card } from '../src/components/Card';
 import { Tela } from '../src/components/Tela';
 import { useAuth } from '../src/context/AuthContext';
 import { cores } from '../src/theme/cores';
-import { fontes } from '../src/theme/tipografia';
+import { fontes, tamanhos } from '../src/theme/tipografia';
 
 const PAPEIS = {
   CIDADAO: 'Cidadão',
@@ -27,7 +27,7 @@ export default function Perfil() {
 
   const linha = (rotulo: string, valor?: string | number) =>
     valor === undefined ? null : (
-      <Text style={{ fontFamily: fontes.texto, fontSize: 15, color: cores.texto }}>
+      <Text style={{ fontFamily: fontes.texto, fontSize: tamanhos.corpo, color: cores.texto }}>
         <Text style={{ fontFamily: fontes.textoMedio }}>{rotulo}: </Text>
         {valor}
       </Text>

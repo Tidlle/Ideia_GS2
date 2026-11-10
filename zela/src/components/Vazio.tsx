@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { cores } from '../theme/cores';
-import { fontes } from '../theme/tipografia';
+import { fontes, tamanhos } from '../theme/tipografia';
 
 export function Vazio({
   texto,
@@ -21,5 +21,10 @@ export function Vazio({
 
 const styles = StyleSheet.create({
   centro: { alignItems: 'center', padding: 32, gap: 8 },
-  texto: { fontFamily: fontes.texto, fontSize: 15, color: cores.textoSuave, textAlign: 'center' },
+  texto: {
+    fontFamily: fontes.texto,
+    fontSize: tamanhos.corpo,
+    color: cores.textoSuave,
+    textAlign: 'center',
+  },
 });

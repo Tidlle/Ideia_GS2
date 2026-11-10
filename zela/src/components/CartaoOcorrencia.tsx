@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { db } from '../services/store';
 import { cores } from '../theme/cores';
 import { textos } from '../theme/textos';
-import { fontes } from '../theme/tipografia';
+import { fontes, tamanhos } from '../theme/tipografia';
 import { Ocorrencia } from '../types';
 import { descreverPrazo, formatarDistancia } from '../utils';
 import { Card } from './Card';
@@ -25,7 +25,7 @@ export function CartaoOcorrencia({ o, mostrarPrazo }: { o: Ocorrencia; mostrarPr
         <Ionicons
           name={(categoria?.icone ?? 'help-outline') as keyof typeof Ionicons.glyphMap}
           size={18}
-          color={cores.verdeEscuro}
+          color={cores.link}
         />
         <Text style={styles.categoria}>{categoria?.nome}</Text>
         <Text style={styles.dist}>{formatarDistancia(o.distanciaM)}</Text>
@@ -41,6 +41,11 @@ export function CartaoOcorrencia({ o, mostrarPrazo }: { o: Ocorrencia; mostrarPr
 
 const styles = StyleSheet.create({
   topo: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  categoria: { flex: 1, fontFamily: fontes.textoMedio, fontSize: 12, color: cores.verdeEscuro },
-  dist: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoSuave },
+  categoria: {
+    flex: 1,
+    fontFamily: fontes.textoMedio,
+    fontSize: tamanhos.legenda,
+    color: cores.link,
+  },
+  dist: { fontFamily: fontes.texto, fontSize: tamanhos.legenda, color: cores.textoSuave },
 });

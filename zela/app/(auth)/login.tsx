@@ -8,7 +8,7 @@ import { Campo } from '../../src/components/Campo';
 import { useAuth } from '../../src/context/AuthContext';
 import { cores } from '../../src/theme/cores';
 import { textos } from '../../src/theme/textos';
-import { fontes } from '../../src/theme/tipografia';
+import { fontes, tamanhos } from '../../src/theme/tipografia';
 
 const ATALHOS = [
   { rotulo: 'Cidadão', email: 'cidadao@zela.com' },
@@ -130,18 +130,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  marca: { fontFamily: fontes.titulo, fontSize: 44, color: cores.claro },
-  lema: { fontFamily: fontes.texto, fontSize: 15, color: cores.textoSobreEscuro, marginBottom: 12 },
+  marca: { fontFamily: fontes.titulo, fontSize: tamanhos.display, color: cores.claro },
+  lema: {
+    fontFamily: fontes.texto,
+    fontSize: tamanhos.corpo,
+    color: cores.textoSobreEscuro,
+    marginBottom: 12,
+  },
   formulario: { backgroundColor: cores.claro, borderRadius: 16, padding: 16, gap: 12 },
   link: {
     fontFamily: fontes.textoMedio,
     color: cores.verdeEscuro,
     textAlign: 'center',
     paddingVertical: 12,
-    fontSize: 14,
+    fontSize: tamanhos.apoio,
   },
-  sucesso: { color: cores.verdeEscuro, fontFamily: fontes.textoMedio, fontSize: 13 },
+  sucesso: { color: cores.verdeEscuro, fontFamily: fontes.textoMedio, fontSize: tamanhos.apoio },
   atalhos: { gap: 8, marginTop: 8 },
-  atalhosTitulo: { color: cores.textoSobreEscuro, fontFamily: fontes.textoMedio, fontSize: 12 },
+  atalhosTitulo: {
+    color: cores.textoSobreEscuro,
+    fontFamily: fontes.textoMedio,
+    fontSize: tamanhos.legenda,
+  },
   atalhosLinha: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 });

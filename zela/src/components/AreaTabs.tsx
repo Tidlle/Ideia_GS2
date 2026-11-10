@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
 import { cores } from '../theme/cores';
-import { fontes } from '../theme/tipografia';
+import { fontes, tamanhos } from '../theme/tipografia';
 import { CabecalhoAcoes } from './CabecalhoAcoes';
 
 interface Aba {
@@ -23,13 +23,13 @@ export function AreaTabs({ abas }: Props) {
         headerTintColor: cores.claro,
         headerTitleStyle: { fontFamily: fontes.titulo },
         headerRight: () => <CabecalhoAcoes />,
-        tabBarActiveTintColor: cores.verdeEscuro,
+        tabBarActiveTintColor: cores.link,
         tabBarInactiveTintColor: cores.textoSuave,
         tabBarStyle:
           abas.length > 1
             ? { backgroundColor: cores.cartao, borderTopColor: cores.borda, minHeight: 60 }
             : { display: 'none' },
-        tabBarLabelStyle: { fontFamily: fontes.textoMedio, fontSize: 11 },
+        tabBarLabelStyle: { fontFamily: fontes.textoMedio, fontSize: tamanhos.legenda },
       }}
     >
       {abas.map((a) => (

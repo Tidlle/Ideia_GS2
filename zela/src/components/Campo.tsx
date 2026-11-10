@@ -1,9 +1,9 @@
 import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
 
 import { cores } from '../theme/cores';
-import { raio, TOQUE_MIN } from '../theme/espacos';
+import { espacos, raio, TOQUE_MIN } from '../theme/espacos';
 import { textos } from '../theme/textos';
-import { fontes } from '../theme/tipografia';
+import { fontes, tamanhos } from '../theme/tipografia';
 
 interface Props extends TextInputProps {
   rotulo: string;
@@ -37,14 +37,14 @@ const styles = StyleSheet.create({
     minHeight: TOQUE_MIN,
     borderWidth: 1,
     borderColor: cores.borda,
-    borderRadius: raio.md,
+    borderRadius: raio.controle,
     backgroundColor: cores.cartao,
-    paddingHorizontal: 12,
+    paddingHorizontal: espacos.md,
     fontFamily: fontes.texto,
-    fontSize: 15,
+    fontSize: tamanhos.corpo,
     color: cores.texto,
   },
   multi: { minHeight: 90, paddingTop: 10, textAlignVertical: 'top' },
-  inputErro: { borderColor: cores.urgente },
-  erro: { fontFamily: fontes.textoMedio, fontSize: 12, color: cores.urgente },
+  inputErro: { borderColor: cores.perigo },
+  erro: { fontFamily: fontes.textoMedio, fontSize: tamanhos.legenda, color: cores.perigo },
 });

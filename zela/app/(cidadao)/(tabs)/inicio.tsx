@@ -10,7 +10,7 @@ import { useAuth } from '../../../src/context/AuthContext';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { listarOcorrencias } from '../../../src/services/ocorrencias';
 import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { fontes, tamanhos } from '../../../src/theme/tipografia';
 
 export default function Inicio() {
   const { usuario } = useAuth();
@@ -28,7 +28,9 @@ export default function Inicio() {
       />
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         <Ionicons name="location-outline" size={16} color={cores.textoSuave} />
-        <Text style={{ fontFamily: fontes.texto, fontSize: 13, color: cores.textoSuave }}>
+        <Text
+          style={{ fontFamily: fontes.texto, fontSize: tamanhos.apoio, color: cores.textoSuave }}
+        >
           Ordenadas por distância (mapa em breve)
         </Text>
       </View>

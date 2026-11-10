@@ -23,7 +23,6 @@ import {
   reprovarOS,
 } from '../../../src/services/ordens';
 import { db } from '../../../src/services/store';
-import { cores } from '../../../src/theme/cores';
 import { textos } from '../../../src/theme/textos';
 import { descreverPrazo } from '../../../src/utils';
 
@@ -85,9 +84,7 @@ export default function DetalheOSGestor() {
           {exec?.nome} · {exec?.contrato}
         </Text>
         <Text style={textos.rotuloInfo}>Prazo da etapa</Text>
-        <Text style={[textos.valor, prazo.atrasado && { color: cores.urgente }]}>
-          {prazo.texto}
-        </Text>
+        <Text style={[textos.valor, prazo.atrasado && textos.atrasado]}>{prazo.texto}</Text>
         <Text style={textos.rotuloInfo}>Confiança da IA (antes/depois)</Text>
         <Text style={textos.valor}>
           {os.confiancaIA !== undefined

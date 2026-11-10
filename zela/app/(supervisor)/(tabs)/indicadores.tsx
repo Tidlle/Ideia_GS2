@@ -7,7 +7,9 @@ import { Secao, Tela } from '../../../src/components/Tela';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { calcularIndicadores, listarExecutores } from '../../../src/services/ordens';
 import { cores } from '../../../src/theme/cores';
+import { raio } from '../../../src/theme/espacos';
 import { textos } from '../../../src/theme/textos';
+import { formatarHoras } from '../../../src/utils';
 
 export default function Indicadores() {
   const c = useCarga(async () => [
@@ -30,7 +32,7 @@ export default function Indicadores() {
                     </Text>
                     <Text style={textos.meta}>{e.contrato}</Text>
                     <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
-                      <Metrica rotulo="Tempo médio" valor={`${e.tempoMedioHoras} h`} />
+                      <Metrica rotulo="Tempo médio" valor={formatarHoras(e.tempoMedioHoras)} />
                       <Metrica
                         rotulo="No prazo"
                         valor={`${e.prazosCumpridosPct}%`}
@@ -51,13 +53,15 @@ export default function Indicadores() {
                     <Text style={textos.tituloCartao}>
                       {i + 1}º {b.bairro} — {b.horas} h em média
                     </Text>
-                    <View style={{ height: 8, borderRadius: 4, backgroundColor: cores.borda }}>
+                    <View
+                      style={{ height: 8, borderRadius: raio.pilula, backgroundColor: cores.borda }}
+                    >
                       <View
                         style={{
                           height: 8,
-                          borderRadius: 4,
+                          borderRadius: raio.pilula,
                           width: `${Math.round((b.horas / maxHoras) * 100)}%`,
-                          backgroundColor: b.horas > 72 ? cores.laranja : cores.verde,
+                          backgroundColor: b.horas > 72 ? cores.atencaoForte : cores.sucesso,
                         }}
                       />
                     </View>

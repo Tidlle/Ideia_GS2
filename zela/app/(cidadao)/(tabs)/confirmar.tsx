@@ -10,7 +10,7 @@ import { mostrarErro } from '../../../src/services/feedback';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { listarParaConfirmar, responderConfirmacao } from '../../../src/services/ocorrencias';
 import { cores } from '../../../src/theme/cores';
-import { fontes } from '../../../src/theme/tipografia';
+import { fontes, tamanhos } from '../../../src/theme/tipografia';
 import { formatarDistancia } from '../../../src/utils';
 
 export default function Confirmar() {
@@ -69,7 +69,12 @@ export default function Confirmar() {
 }
 
 const styles = StyleSheet.create({
-  titulo: { fontFamily: fontes.textoNegrito, fontSize: 15, color: cores.texto },
-  meta: { fontFamily: fontes.texto, fontSize: 13, color: cores.textoSuave },
-  pergunta: { fontFamily: fontes.titulo, fontSize: 16, color: cores.texto, marginTop: 4 },
+  titulo: { fontFamily: fontes.textoNegrito, fontSize: tamanhos.corpo, color: cores.texto },
+  meta: { fontFamily: fontes.texto, fontSize: tamanhos.apoio, color: cores.textoSuave },
+  pergunta: {
+    fontFamily: fontes.titulo,
+    fontSize: tamanhos.secao,
+    color: cores.texto,
+    marginTop: 4,
+  },
 });

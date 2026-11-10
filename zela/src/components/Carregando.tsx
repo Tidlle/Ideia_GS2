@@ -5,7 +5,7 @@ import { cores } from '../theme/cores';
 export function Carregando() {
   return (
     <View style={styles.centro} accessibilityLabel="Carregando" accessibilityRole="progressbar">
-      <ActivityIndicator size="large" color={cores.verde} />
+      <ActivityIndicator size="large" color={cores.marca} />
     </View>
   );
 }

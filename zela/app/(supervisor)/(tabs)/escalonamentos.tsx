@@ -27,7 +27,7 @@ function CartaoEscalonado({ os, supervisor }: { os: OrdemServico; supervisor: st
   const [cobrado, setCobrado] = useState(false);
 
   return (
-    <Card estilo={{ borderColor: cores.laranja }}>
+    <Card estilo={{ borderColor: cores.perigo }}>
       <Text style={textos.id}>OS #{os.id}</Text>
       <Text style={textos.tituloCartao}>{o?.titulo}</Text>
       <Text style={textos.meta}>{e?.nome}</Text>

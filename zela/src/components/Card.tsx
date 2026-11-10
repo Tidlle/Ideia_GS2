@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, ViewStyle } from 'react-native';
 
 import { cores } from '../theme/cores';
-import { raio } from '../theme/espacos';
+import { espacos, raio } from '../theme/espacos';
 
 interface Props {
   children: ReactNode;
@@ -32,11 +32,11 @@ export function Card({ children, onPress, escuro, estilo, rotulo }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: cores.cartao,
-    borderRadius: raio.lg,
+    borderRadius: raio.cartao,
     borderWidth: 1,
     borderColor: cores.borda,
-    padding: 14,
-    gap: 6,
+    padding: espacos.lg,
+    gap: espacos.sm,
   },
   escuro: { backgroundColor: cores.escuro, borderColor: cores.escuro },
 });

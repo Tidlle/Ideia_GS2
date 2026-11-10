@@ -2,7 +2,7 @@ import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
 import { cores } from '../theme/cores';
 import { raio, TOQUE_MIN } from '../theme/espacos';
-import { fontes } from '../theme/tipografia';
+import { fontes, tamanhos } from '../theme/tipografia';
 
 interface Props {
   opcoes: { valor: string; rotulo: string }[];
@@ -40,12 +40,12 @@ const styles = StyleSheet.create({
   chip: {
     minHeight: TOQUE_MIN - 4,
     paddingHorizontal: 14,
-    borderRadius: raio.pill,
+    borderRadius: raio.pilula,
     borderWidth: 1,
     borderColor: cores.borda,
     backgroundColor: cores.cartao,
     justifyContent: 'center',
   },
   ativo: { backgroundColor: cores.escuro, borderColor: cores.escuro },
-  texto: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.texto },
+  texto: { fontFamily: fontes.textoMedio, fontSize: tamanhos.apoio, color: cores.texto },
 });

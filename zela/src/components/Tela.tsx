@@ -2,7 +2,8 @@ import { ReactNode } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { cores } from '../theme/cores';
-import { fontes } from '../theme/tipografia';
+import { espacos } from '../theme/espacos';
+import { textos } from '../theme/textos';
 
 /** Contêiner padrão das telas: fundo, rolagem e título opcional. */
 export function Tela({
@@ -21,8 +22,8 @@ export function Tela({
       keyboardShouldPersistTaps="handled"
     >
       {!!titulo && (
-        <View style={{ gap: 2 }}>
-          <Text accessibilityRole="header" style={styles.titulo}>
+        <View style={{ gap: espacos.xs }}>
+          <Text accessibilityRole="header" style={textos.titulo}>
             {titulo}
           </Text>
           {!!subtitulo && <Text style={styles.sub}>{subtitulo}</Text>}
@@ -35,8 +36,8 @@ export function Tela({
 
 export function Secao({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
-    <View style={{ gap: 8 }}>
-      <Text accessibilityRole="header" style={styles.secao}>
+    <View style={{ gap: espacos.sm }}>
+      <Text accessibilityRole="header" style={textos.secao}>
         {titulo}
       </Text>
       {children}
@@ -46,8 +47,6 @@ export function Secao({ titulo, children }: { titulo: string; children: ReactNod
 
 const styles = StyleSheet.create({
   fundo: { flex: 1, backgroundColor: cores.claro },
-  conteudo: { padding: 16, gap: 14, paddingBottom: 40 },
-  titulo: { fontFamily: fontes.titulo, fontSize: 24, color: cores.texto },
-  sub: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoSuave },
-  secao: { fontFamily: fontes.titulo, fontSize: 17, color: cores.texto },
+  conteudo: { padding: espacos.lg, gap: espacos.lg, paddingBottom: espacos.xxl + espacos.sm },
+  sub: { ...textos.meta },
 });

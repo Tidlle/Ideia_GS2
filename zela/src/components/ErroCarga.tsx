@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { cores } from '../theme/cores';
-import { fontes } from '../theme/tipografia';
+import { fontes, tamanhos } from '../theme/tipografia';
 import { Botao } from './Botao';
 
 export function ErroCarga({ mensagem, onTentar }: { mensagem: string; onTentar: () => void }) {
@@ -15,5 +15,10 @@ export function ErroCarga({ mensagem, onTentar }: { mensagem: string; onTentar: 
 
 const styles = StyleSheet.create({
   centro: { alignItems: 'center', padding: 32, gap: 12 },
-  texto: { fontFamily: fontes.texto, fontSize: 15, color: cores.urgente, textAlign: 'center' },
+  texto: {
+    fontFamily: fontes.texto,
+    fontSize: tamanhos.corpo,
+    color: cores.perigo,
+    textAlign: 'center',
+  },
 });

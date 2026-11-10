@@ -20,7 +20,7 @@ import {
 import { db } from '../../../src/services/store';
 import { cores } from '../../../src/theme/cores';
 import { textos } from '../../../src/theme/textos';
-import { fontes } from '../../../src/theme/tipografia';
+import { fontes, tamanhos } from '../../../src/theme/tipografia';
 
 export default function Checkin() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -99,13 +99,13 @@ export default function Checkin() {
       </Card>
 
       {distancia !== null && (
-        <Card escuro={dentro} estilo={!dentro ? { borderColor: cores.urgente } : undefined}>
+        <Card escuro={dentro} estilo={!dentro ? { borderColor: cores.perigo } : undefined}>
           <Text
             accessibilityLiveRegion="polite"
             style={{
               fontFamily: fontes.titulo,
-              fontSize: 18,
-              color: dentro ? cores.verde : cores.urgente,
+              fontSize: tamanhos.secao,
+              color: dentro ? cores.marca : cores.perigo,
             }}
           >
             {dentro

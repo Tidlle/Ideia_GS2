@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { cores } from '../theme/cores';
-import { fontes } from '../theme/tipografia';
+import { fontes, tamanhos } from '../theme/tipografia';
 import { EventoOS } from '../types';
 import { formatarData } from '../utils';
 import { infoStatus, StatusBadge } from './StatusBadge';
@@ -35,6 +35,6 @@ const styles = StyleSheet.create({
   ponto: { width: 12, height: 12, borderRadius: 6, marginTop: 4 },
   fio: { flex: 1, width: 2, backgroundColor: cores.borda, marginVertical: 2 },
   conteudo: { flex: 1, paddingBottom: 14, gap: 3 },
-  meta: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoSuave },
-  just: { fontFamily: fontes.texto, fontSize: 13, color: cores.texto },
+  meta: { fontFamily: fontes.texto, fontSize: tamanhos.legenda, color: cores.textoSuave },
+  just: { fontFamily: fontes.texto, fontSize: tamanhos.apoio, color: cores.texto },
 });

@@ -8,7 +8,7 @@ import { Tela } from '../src/components/Tela';
 import { useCarga } from '../src/hooks/useCarga';
 import { listarNotificacoes, marcarNotificacoesLidas } from '../src/services/ordens';
 import { cores } from '../src/theme/cores';
-import { fontes } from '../src/theme/tipografia';
+import { fontes, tamanhos } from '../src/theme/tipografia';
 import { formatarData } from '../src/utils';
 
 export default function Notificacoes() {
@@ -26,24 +26,30 @@ export default function Notificacoes() {
       <Estado {...c} dados={c.dados} textoVazio="Nenhuma notificação por enquanto.">
         {(lista) =>
           lista.map((n) => (
-            <Card key={n.id} estilo={n.lida ? undefined : { borderColor: cores.verde }}>
+            <Card key={n.id} estilo={n.lida ? undefined : { borderColor: cores.marca }}>
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <Ionicons
                   name={n.lida ? 'mail-open-outline' : 'mail-unread-outline'}
                   size={22}
-                  color={cores.verdeEscuro}
+                  color={cores.link}
                 />
                 <View style={{ flex: 1 }}>
                   <Text
                     style={{
                       fontFamily: n.lida ? fontes.texto : fontes.textoMedio,
-                      fontSize: 14,
+                      fontSize: tamanhos.corpo,
                       color: cores.texto,
                     }}
                   >
                     {n.texto}
                   </Text>
-                  <Text style={{ fontFamily: fontes.texto, fontSize: 12, color: cores.textoSuave }}>
+                  <Text
+                    style={{
+                      fontFamily: fontes.texto,
+                      fontSize: tamanhos.legenda,
+                      color: cores.textoSuave,
+                    }}
+                  >
                     {formatarData(n.data)}
                   </Text>
                 </View>

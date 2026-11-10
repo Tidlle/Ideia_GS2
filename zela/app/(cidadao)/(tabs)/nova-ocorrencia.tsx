@@ -16,8 +16,9 @@ import { mensagemDeErro } from '../../../src/services/feedback';
 import { criarOcorrencia, triarFoto } from '../../../src/services/ocorrencias';
 import { db } from '../../../src/services/store';
 import { cores } from '../../../src/theme/cores';
+import { raio } from '../../../src/theme/espacos';
 import { textos } from '../../../src/theme/textos';
-import { fontes } from '../../../src/theme/tipografia';
+import { fontes, tamanhos } from '../../../src/theme/tipografia';
 
 // Centro da Vila Mariana — usado quando o GPS não está disponível (ex.: navegador/emulador).
 const LOCAL_PADRAO = { latitude: -23.5893, longitude: -46.6347 };
@@ -139,7 +140,7 @@ export default function NovaOcorrencia() {
         {analisando && (
           <Card>
             <View style={styles.linha}>
-              <ActivityIndicator color={cores.verde} />
+              <ActivityIndicator color={cores.marca} />
               <Text style={styles.texto}>IA analisando…</Text>
             </View>
           </Card>
@@ -178,7 +179,7 @@ export default function NovaOcorrencia() {
             <Switch
               value={urgente}
               onValueChange={setUrgente}
-              trackColor={{ true: cores.urgente, false: cores.borda }}
+              trackColor={{ true: cores.perigo, false: cores.borda }}
               thumbColor={cores.branco}
               // só no react-native-web: sem isso o botão fica verde-azulado quando ligado
               {...({ activeThumbColor: cores.branco } as object)}
@@ -233,14 +234,14 @@ export default function NovaOcorrencia() {
 
 const styles = StyleSheet.create({
   linha: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  texto: { fontFamily: fontes.texto, fontSize: 14, color: cores.texto },
-  suave: { fontFamily: fontes.texto, fontSize: 13, color: cores.textoSuave },
+  texto: { fontFamily: fontes.texto, fontSize: tamanhos.corpo, color: cores.texto },
+  suave: { fontFamily: fontes.texto, fontSize: tamanhos.apoio, color: cores.textoSuave },
   alertaUrgente: {
     flexDirection: 'row',
     gap: 10,
-    backgroundColor: cores.urgente,
+    backgroundColor: cores.perigo,
     padding: 12,
-    borderRadius: 12,
+    borderRadius: raio.cartao,
   },
-  alertaTexto: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.branco },
+  alertaTexto: { fontFamily: fontes.textoMedio, fontSize: tamanhos.apoio, color: cores.branco },
 });
