@@ -1,11 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { db } from '../services/store';
-import { ehAtrasada } from '../services/ordens';
+import { cores } from '../theme/cores';
+import { espacos } from '../theme/espacos';
 import { textos } from '../theme/textos';
+import { fontes, tamanhos } from '../theme/tipografia';
 import { OrdemServico } from '../types';
-import { descreverPrazo } from '../utils';
+import { formatarProtocolo, situacaoPrazo } from '../utils';
 import { Card } from './Card';
+import { ReguaPrazo } from './ReguaPrazo';
 import { StatusBadge } from './StatusBadge';
 
 interface Props {
@@ -14,30 +17,56 @@ interface Props {
   mostrarExecutor?: boolean;
 }
 
+/** OS na lista: a faixa do protocolo no topo e a régua do prazo embaixo, como um comprovante resumido. */
 export function CartaoOS({ os, onPress, mostrarExecutor }: Props) {
   const o = db.ocorrencias.find((x) => x.id === os.ocorrenciaId);
   const e = db.executores.find((x) => x.id === os.executorId);
-  const prazo = descreverPrazo(os.prazoEtapa);
+  const prazo = situacaoPrazo(os);
   return (
-    <Card onPress={onPress} rotulo={`Abrir OS ${os.id}: ${o?.titulo}`}>
-      <Text style={textos.id}>OS #{os.id}</Text>
+    <Card onPress={onPress} rotulo={`Abrir ordem de serviço ${os.id}: ${o?.titulo ?? ''}`}>
+      <View style={styles.faixa}>
+        <Text style={styles.protocolo}>
+          {formatarProtocolo(os.ocorrenciaId, o?.criadaEm ?? os.criadaEm)}
+        </Text>
+        <Text style={textos.id}>OS {os.id}</Text>
+      </View>
       <Text style={textos.tituloCartao}>{o?.titulo}</Text>
-      {mostrarExecutor && <Text style={textos.meta}>{e?.nome}</Text>}
-      <Text style={textos.meta}>
-        {o?.bairro} · {o?.endereco}
-      </Text>
+      {mostrarExecutor && !!e && <Text style={textos.meta}>{e.nome}</Text>}
+      {!!o && (
+        <Text style={textos.meta}>
+          {o.endereco}, {o.bairro}
+        </Text>
+      )}
       <View style={styles.selos}>
         <StatusBadge status={os.status} />
-        {ehAtrasada(os) && os.status !== 'ESCALADA' && <StatusBadge status="ATRASADA" />}
-        {os.retrabalho && <StatusBadge status="REABERTA" />}
+        {os.retrabalho && os.status !== 'REABERTA' && <StatusBadge status="REABERTA" />}
       </View>
-      {!['ENCERRADA', 'ENCAMINHADA', 'RECUSADA'].includes(os.status) && (
-        <Text style={[textos.prazo, prazo.atrasado && textos.atrasado]}>{prazo.texto}</Text>
+      {prazo && (
+        <View style={{ marginTop: espacos.xs }}>
+          <ReguaPrazo {...prazo} compacta />
+        </View>
       )}
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  selos: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', alignItems: 'center' },
+  faixa: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    paddingBottom: espacos.sm,
+    marginBottom: espacos.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: cores.borda,
+    borderStyle: 'dashed',
+  },
+  protocolo: {
+    fontFamily: fontes.titulo,
+    fontSize: tamanhos.corpo,
+    color: cores.texto,
+    fontVariant: ['tabular-nums'],
+    letterSpacing: 0.3,
+  },
+  selos: { flexDirection: 'row', gap: espacos.sm, flexWrap: 'wrap', alignItems: 'center' },
 });

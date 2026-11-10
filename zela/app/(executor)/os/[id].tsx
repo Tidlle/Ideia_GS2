@@ -6,6 +6,7 @@ import { Botao } from '../../../src/components/Botao';
 import { Campo } from '../../../src/components/Campo';
 import { Card } from '../../../src/components/Card';
 import { Carregando } from '../../../src/components/Carregando';
+import { ComprovanteOS } from '../../../src/components/ComprovanteOS';
 import { Chips } from '../../../src/components/Chips';
 import { Foto } from '../../../src/components/Foto';
 import { StatusBadge } from '../../../src/components/StatusBadge';
@@ -18,7 +19,6 @@ import { useCarga } from '../../../src/hooks/useCarga';
 import { obterOrdem, aceitarOS, recusarOS } from '../../../src/services/ordens';
 import { db } from '../../../src/services/store';
 import { textos } from '../../../src/theme/textos';
-import { descreverPrazo } from '../../../src/utils';
 
 const MOTIVOS = [
   { valor: 'Fora da competência', rotulo: 'Fora da competência' },
@@ -42,7 +42,7 @@ export default function DetalheOSExecutor() {
   if (!os) return <Vazio texto="OS não encontrada." />;
   const o = db.ocorrencias.find((x) => x.id === os.ocorrenciaId)!;
   const cat = db.categorias.find((x) => x.id === o.categoriaId);
-  const prazo = descreverPrazo(os.prazoEtapa);
+  const executor = db.executores.find((e) => e.id === os.executorId);
   const podeDecidir =
     os.status === 'EMITIDA' || os.status === 'REABERTA' || os.status === 'ESCALADA';
 
@@ -69,21 +69,17 @@ export default function DetalheOSExecutor() {
   }
 
   return (
-    <Tela titulo={`OS #${os.id}`} subtitulo={o.titulo}>
-      <StatusBadge status={os.status} />
-      <Foto rotulo="Antes" uri={o.fotoAntesUrl} />
-      <Card>
-        <Text style={textos.rotuloInfo}>Categoria</Text>
-        <Text style={textos.valor}>{cat?.nome}</Text>
-        <Text style={textos.rotuloInfo}>Local</Text>
-        <Text style={textos.valor}>
-          {o.endereco} ({o.bairro})
-        </Text>
-        <Text style={textos.rotuloInfo}>Descrição</Text>
-        <Text style={textos.valor}>{o.descricaoIA}</Text>
-        <Text style={textos.rotuloInfo}>Prazo da etapa</Text>
-        <Text style={[textos.valor, prazo.atrasado && textos.atrasado]}>{prazo.texto}</Text>
-      </Card>
+    <Tela>
+      <ComprovanteOS
+        ocorrencia={o}
+        os={os}
+        categoria={cat}
+        executor={executor}
+        status={os.status}
+        extras={
+          os.retrabalho && os.status !== 'REABERTA' ? <StatusBadge status="REABERTA" /> : undefined
+        }
+      />
 
       {podeDecidir && !recusando && (
         <>
@@ -120,6 +116,14 @@ export default function DetalheOSExecutor() {
           grande
         />
       )}
+
+      <Secao titulo="O problema">
+        <Foto rotulo="Antes" uri={o.fotoAntesUrl} />
+        <Card>
+          <Text style={textos.rotuloInfo}>Descrição da IA</Text>
+          <Text style={textos.valor}>{o.descricaoIA}</Text>
+        </Card>
+      </Secao>
 
       <Secao titulo="Linha do tempo">
         <Timeline eventos={os.timeline} />

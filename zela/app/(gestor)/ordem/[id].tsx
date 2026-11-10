@@ -6,6 +6,7 @@ import { Botao } from '../../../src/components/Botao';
 import { Campo } from '../../../src/components/Campo';
 import { Card } from '../../../src/components/Card';
 import { Carregando } from '../../../src/components/Carregando';
+import { ComprovanteOS } from '../../../src/components/ComprovanteOS';
 import { Chips } from '../../../src/components/Chips';
 import { Foto } from '../../../src/components/Foto';
 import { StatusBadge } from '../../../src/components/StatusBadge';
@@ -24,7 +25,6 @@ import {
 } from '../../../src/services/ordens';
 import { db } from '../../../src/services/store';
 import { textos } from '../../../src/theme/textos';
-import { descreverPrazo } from '../../../src/utils';
 
 type Modo = 'reprovar' | 'prazo' | 'cancelar' | null;
 const PRAZOS = ['12', '24', '48', '72'].map((h) => ({ valor: h, rotulo: `${h} h` }));
@@ -43,7 +43,7 @@ export default function DetalheOSGestor() {
   if (!os) return <Vazio texto="OS não encontrada." />;
   const o = db.ocorrencias.find((x) => x.id === os.ocorrenciaId)!;
   const exec = db.executores.find((e) => e.id === os.executorId);
-  const prazo = descreverPrazo(os.prazoEtapa);
+  const categoria = db.categorias.find((x) => x.id === o.categoriaId);
   const aberta = !['ENCERRADA', 'ENCAMINHADA', 'RECUSADA'].includes(os.status);
   const podeValidar = os.status === 'CONCLUIDA';
 
@@ -61,11 +61,17 @@ export default function DetalheOSGestor() {
   }
 
   return (
-    <Tela titulo={`OS #${os.id}`} subtitulo={o.titulo}>
-      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-        <StatusBadge status={os.status} />
-        {os.retrabalho && <StatusBadge status="REABERTA" />}
-      </View>
+    <Tela>
+      <ComprovanteOS
+        ocorrencia={o}
+        os={os}
+        categoria={categoria}
+        executor={exec}
+        status={os.status}
+        extras={
+          os.retrabalho && os.status !== 'REABERTA' ? <StatusBadge status="REABERTA" /> : undefined
+        }
+      />
 
       <Secao titulo="Antes e depois">
         <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -79,13 +85,7 @@ export default function DetalheOSGestor() {
       </Secao>
 
       <Card>
-        <Text style={textos.rotuloInfo}>Executor</Text>
-        <Text style={textos.valor}>
-          {exec?.nome} · {exec?.contrato}
-        </Text>
-        <Text style={textos.rotuloInfo}>Prazo da etapa</Text>
-        <Text style={[textos.valor, prazo.atrasado && textos.atrasado]}>{prazo.texto}</Text>
-        <Text style={textos.rotuloInfo}>Confiança da IA (antes/depois)</Text>
+        <Text style={textos.rotuloInfo}>Confiança da IA na comparação antes e depois</Text>
         <Text style={textos.valor}>
           {os.confiancaIA !== undefined
             ? `${Math.round(os.confiancaIA * 100)}%`
@@ -94,7 +94,7 @@ export default function DetalheOSGestor() {
         <Text style={textos.rotuloInfo}>Local do check-in</Text>
         <Text style={textos.valor}>
           {os.checkinLat !== undefined
-            ? `${os.checkinLat.toFixed(4)}, ${os.checkinLng?.toFixed(4)}`
+            ? `Latitude ${os.checkinLat.toFixed(4)}, longitude ${os.checkinLng?.toFixed(4)}`
             : 'Sem check-in'}
         </Text>
         {!!os.observacao && (
@@ -104,7 +104,10 @@ export default function DetalheOSGestor() {
           </>
         )}
         {!!os.protocoloExterno && (
-          <Text style={textos.valor}>Protocolo externo: {os.protocoloExterno}</Text>
+          <>
+            <Text style={textos.rotuloInfo}>Protocolo no outro órgão</Text>
+            <Text style={textos.valor}>{os.protocoloExterno}</Text>
+          </>
         )}
       </Card>
 
