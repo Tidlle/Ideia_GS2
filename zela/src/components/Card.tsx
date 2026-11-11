@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View, ViewStyle } from 'react-native';
 
 import { cores } from '../theme/cores';
 import { espacos, raio } from '../theme/espacos';
+import { comFoco } from '../theme/foco';
 
 interface Props {
   children: ReactNode;
@@ -20,7 +21,7 @@ export function Card({ children, onPress, escuro, estilo, rotulo }: Props) {
         accessibilityRole="button"
         accessibilityLabel={rotulo}
         onPress={onPress}
-        style={({ pressed }) => [...s, pressed && { opacity: 0.85 }]}
+        style={(e) => [...s, e.pressed && { opacity: 0.85 }, comFoco(e)]}
       >
         {children}
       </Pressable>

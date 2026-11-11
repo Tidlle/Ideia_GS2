@@ -103,7 +103,7 @@ export default function Concluir() {
     );
 
   return (
-    <Tela titulo={`Concluir OS #${os.id}`} subtitulo="Foto do depois tirada no local (só câmera)">
+    <Tela titulo={`Concluir a OS ${os.id}`} subtitulo="Foto do depois tirada no local (só câmera)">
       {foto ? <Foto rotulo="Depois" uri={foto} altura={200} /> : null}
       <Botao
         titulo={foto ? 'Tirar outra foto' : 'Tirar foto do depois'}

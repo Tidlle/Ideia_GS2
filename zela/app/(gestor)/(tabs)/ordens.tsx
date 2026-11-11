@@ -62,7 +62,19 @@ export default function Ordens() {
         selecionado={bairro}
         onChange={setBairro}
       />
-      <Estado {...c} dados={filtradas} textoVazio="Nenhuma OS com esses filtros.">
+      <Estado
+        {...c}
+        dados={filtradas}
+        textoVazio="Nenhuma OS com esses filtros."
+        acaoVazio={{
+          titulo: 'Limpar filtros',
+          onPress: () => {
+            setFiltro('TODOS');
+            setExecutor('TODOS');
+            setBairro('TODOS');
+          },
+        }}
+      >
         {(lista) =>
           lista.map((os) => (
             <CartaoOS

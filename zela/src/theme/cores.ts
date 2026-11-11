@@ -40,10 +40,12 @@ export const cores = {
   andamentoFundo: base.salvia,
   /** Pede atenção: aguardando, reaberta, prazo perto do fim. */
   atencao: base.laranjaEscuro,
-  atencaoForte: base.laranja,
+  // Bordas e régua: laranja escurecido para ter contraste mínimo de 3:1 com o fundo.
+  atencaoForte: '#C9661C',
   atencaoFundo: base.laranjaFundo,
   /** Risco ou falha: urgente, escalada, atrasada, recusada, erro. */
-  perigo: base.urgente,
+  // Um tom abaixo do vermelho do deck: passa no contraste AA também sobre o fundo do selo.
+  perigo: '#B0321C',
   perigoFundo: base.urgenteFundo,
   /** Fora do fluxo: descartada, encaminhada, encerrada. */
   inativo: base.textoSuave,

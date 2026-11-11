@@ -11,6 +11,7 @@ import { listarOcorrencias } from '../../../src/services/ocorrencias';
 import { cores } from '../../../src/theme/cores';
 import { espacos, raio } from '../../../src/theme/espacos';
 import { textos } from '../../../src/theme/textos';
+import { comFoco } from '../../../src/theme/foco';
 
 export default function Inicio() {
   const { usuario } = useAuth();
@@ -22,7 +23,7 @@ export default function Inicio() {
         accessibilityRole="button"
         accessibilityLabel="Reportar um problema: tire uma foto e marque o local"
         onPress={() => router.push('/(cidadao)/nova-ocorrencia')}
-        style={({ pressed }) => [styles.reportar, pressed && { opacity: 0.9 }]}
+        style={(e) => [styles.reportar, e.pressed && { opacity: 0.9 }, comFoco(e)]}
       >
         <View style={styles.camera}>
           <Ionicons name="camera" size={26} color={cores.sobreAcao} />
@@ -36,7 +37,14 @@ export default function Inicio() {
       </Pressable>
 
       <Secao titulo="Perto de você">
-        <Estado {...c} textoVazio="Nenhuma ocorrência no seu bairro. Que bom!">
+        <Estado
+          {...c}
+          textoVazio="Nenhum problema aberto perto de você. Viu algo na rua?"
+          acaoVazio={{
+            titulo: 'Reportar um problema',
+            onPress: () => router.push('/(cidadao)/nova-ocorrencia'),
+          }}
+        >
           {(lista) => (
             <Grupo>
               {lista.map((o) => (

@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 import { cores } from '../theme/cores';
 import { espacos, raio, TOQUE_MIN } from '../theme/espacos';
 import { fontes, tamanhos } from '../theme/tipografia';
+import { comFoco } from '../theme/foco';
 
 interface Props {
   titulo: string;
@@ -33,12 +34,13 @@ export function Botao({
       accessibilityState={{ disabled: !!off, busy: !!carregando }}
       onPress={onPress}
       disabled={off}
-      style={({ pressed }) => [
+      style={(e) => [
         base.botao,
         grande && base.grande,
         estilo.caixa,
         off && base.off,
-        pressed && base.pressionado,
+        e.pressed && base.pressionado,
+        comFoco(e),
       ]}
     >
       {carregando ? (

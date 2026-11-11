@@ -11,6 +11,7 @@ import { formatarDistancia, situacaoPrazo } from '../utils';
 import { IconeCategoria } from './IconeCategoria';
 import { ReguaPrazo } from './ReguaPrazo';
 import { StatusBadge } from './StatusBadge';
+import { comFoco } from '../theme/foco';
 
 /**
  * Ocorrência como linha de lista. As listas do cidadão são leves (linhas num grupo só);
@@ -40,7 +41,7 @@ export function CartaoOcorrencia({
       accessibilityRole="button"
       accessibilityLabel={`Abrir ocorrência: ${o.titulo}`}
       onPress={() => router.push(`/(cidadao)/ocorrencia/${o.id}` as never)}
-      style={({ pressed }) => [styles.linha, pressed && { backgroundColor: cores.claro }]}
+      style={(e) => [styles.linha, e.pressed && { backgroundColor: cores.claro }, comFoco(e)]}
     >
       <View style={styles.icone}>
         <IconeCategoria nome={categoria?.nome} tamanho={20} cor={cores.andamento} />

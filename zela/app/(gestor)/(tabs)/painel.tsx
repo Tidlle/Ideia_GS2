@@ -16,7 +16,7 @@ export default function Painel() {
   const c = useCarga(async () => [await calcularIndicadores()]);
   return (
     <Tela titulo="Painel da gestão" subtitulo={usuario?.bairro}>
-      <Estado {...c} textoVazio="Sem dados.">
+      <Estado {...c} textoVazio="Os indicadores aparecem quando houver ordens de serviço.">
         {([i]) => (
           <>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: espacos.md }}>

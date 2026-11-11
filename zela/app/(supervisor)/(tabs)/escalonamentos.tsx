@@ -3,6 +3,7 @@ import { Text } from 'react-native';
 
 import { Botao } from '../../../src/components/Botao';
 import { Card } from '../../../src/components/Card';
+import { FaixaProtocolo } from '../../../src/components/CartaoOS';
 import { Chips } from '../../../src/components/Chips';
 import { Estado } from '../../../src/components/Estado';
 import { StatusBadge } from '../../../src/components/StatusBadge';
@@ -28,7 +29,7 @@ function CartaoEscalonado({ os, supervisor }: { os: OrdemServico; supervisor: st
 
   return (
     <Card estilo={{ borderColor: cores.perigo }}>
-      <Text style={textos.id}>OS #{os.id}</Text>
+      <FaixaProtocolo os={os} />
       <Text style={textos.tituloCartao}>{o?.titulo}</Text>
       <Text style={textos.meta}>{e?.nome}</Text>
       <StatusBadge status={os.status} />
@@ -87,7 +88,7 @@ export default function Escalonamentos() {
   const c = useCarga(listarEscalonadas);
   return (
     <Tela titulo="Escalonamentos" subtitulo="OS com prazo estourado">
-      <Estado {...c} textoVazio="Nenhuma OS atrasada. Contratos em dia!">
+      <Estado {...c} textoVazio="Nenhuma OS com prazo estourado. Os contratos estão em dia.">
         {(lista) =>
           lista.map((os) => <CartaoEscalonado key={os.id} os={os} supervisor={usuario!.nome} />)
         }

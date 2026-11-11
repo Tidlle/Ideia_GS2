@@ -25,7 +25,10 @@ export default function MinhasOS() {
 
   return (
     <Tela titulo="Minhas OS" subtitulo={usuario?.nome}>
-      <Estado {...c} textoVazio="Nenhuma ordem de serviço para você agora.">
+      <Estado
+        {...c}
+        textoVazio="Nenhuma ordem de serviço para sua equipe agora. As novas aparecem aqui."
+      >
         {(lista) =>
           GRUPOS.map((g) => {
             const itens = lista.filter((o) => g.status.includes(o.status));

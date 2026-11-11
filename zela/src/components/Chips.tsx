@@ -1,8 +1,9 @@
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
 import { cores } from '../theme/cores';
-import { raio, TOQUE_MIN } from '../theme/espacos';
+import { espacos, raio, TOQUE_MIN } from '../theme/espacos';
 import { fontes, tamanhos } from '../theme/tipografia';
+import { comFoco } from '../theme/foco';
 
 interface Props {
   opcoes: { valor: string; rotulo: string }[];
@@ -15,7 +16,7 @@ export function Chips({ opcoes, selecionado, onChange }: Props) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 8 }}
+      contentContainerStyle={{ gap: espacos.sm, padding: 3 }}
     >
       {opcoes.map((o) => {
         const ativo = o.valor === selecionado;
@@ -26,7 +27,7 @@ export function Chips({ opcoes, selecionado, onChange }: Props) {
             accessibilityState={{ selected: ativo }}
             accessibilityLabel={`Filtro ${o.rotulo}`}
             onPress={() => onChange(o.valor)}
-            style={[styles.chip, ativo && styles.ativo]}
+            style={(e) => [styles.chip, ativo && styles.ativo, comFoco(e)]}
           >
             <Text style={[styles.texto, ativo && { color: cores.claro }]}>{o.rotulo}</Text>
           </Pressable>
@@ -38,7 +39,7 @@ export function Chips({ opcoes, selecionado, onChange }: Props) {
 
 const styles = StyleSheet.create({
   chip: {
-    minHeight: TOQUE_MIN - 4,
+    minHeight: TOQUE_MIN,
     paddingHorizontal: 14,
     borderRadius: raio.pilula,
     borderWidth: 1,

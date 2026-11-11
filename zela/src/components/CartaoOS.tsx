@@ -24,12 +24,7 @@ export function CartaoOS({ os, onPress, mostrarExecutor }: Props) {
   const prazo = situacaoPrazo(os);
   return (
     <Card onPress={onPress} rotulo={`Abrir ordem de serviço ${os.id}: ${o?.titulo ?? ''}`}>
-      <View style={styles.faixa}>
-        <Text style={styles.protocolo}>
-          {formatarProtocolo(os.ocorrenciaId, o?.criadaEm ?? os.criadaEm)}
-        </Text>
-        <Text style={textos.id}>OS {os.id}</Text>
-      </View>
+      <FaixaProtocolo os={os} />
       <Text style={textos.tituloCartao}>{o?.titulo}</Text>
       {mostrarExecutor && !!e && <Text style={textos.meta}>{e.nome}</Text>}
       {!!o && (
@@ -47,6 +42,19 @@ export function CartaoOS({ os, onPress, mostrarExecutor }: Props) {
         </View>
       )}
     </Card>
+  );
+}
+
+/** Faixa do topo dos cartões de OS: o protocolo do problema e o número da OS. */
+export function FaixaProtocolo({ os }: { os: OrdemServico }) {
+  const o = db.ocorrencias.find((x) => x.id === os.ocorrenciaId);
+  return (
+    <View style={styles.faixa}>
+      <Text style={styles.protocolo}>
+        {formatarProtocolo(os.ocorrenciaId, o?.criadaEm ?? os.criadaEm)}
+      </Text>
+      <Text style={textos.id}>OS {os.id}</Text>
+    </View>
   );
 }
 

@@ -17,7 +17,7 @@ export default function Indicadores() {
   ]);
   return (
     <Tela titulo="Indicadores" subtitulo="Executores, contratos e bairros">
-      <Estado {...c} textoVazio="Sem dados.">
+      <Estado {...c} textoVazio="Os indicadores aparecem quando houver ordens de serviço.">
         {([{ exec, ind }]) => {
           const ranking = [...exec].sort((a, b) => b.prazosCumpridosPct - a.prazosCumpridosPct);
           const bairros = [...ind.bairros].sort((a, b) => a.horas - b.horas);

@@ -24,7 +24,20 @@ export default function Minhas() {
   return (
     <Tela titulo="Minhas ocorrências">
       <Chips opcoes={FILTROS} selecionado={filtro} onChange={setFiltro} />
-      <Estado {...c} dados={filtradas} textoVazio="Nenhuma ocorrência com esse filtro.">
+      <Estado
+        {...c}
+        dados={filtradas}
+        textoVazio={
+          filtro === 'TODAS'
+            ? 'Você ainda não reportou nenhum problema.'
+            : 'Nenhuma ocorrência sua com esse status.'
+        }
+        acaoVazio={
+          filtro === 'TODAS'
+            ? undefined
+            : { titulo: 'Ver todas', onPress: () => setFiltro('TODAS') }
+        }
+      >
         {(lista) => (
           <Grupo>
             {lista.map((o) => (

@@ -33,7 +33,10 @@ export default function Confirmar() {
       titulo="Confirmar problemas"
       subtitulo="Ajude a cidade a priorizar: o problema ainda existe?"
     >
-      <Estado {...c} textoVazio="Tudo confirmado por aqui. Obrigado!">
+      <Estado
+        {...c}
+        textoVazio="Nenhum problema perto de você esperando confirmação. Obrigado por ajudar!"
+      >
         {(lista) =>
           lista.map((o) => (
             <Card key={o.id}>

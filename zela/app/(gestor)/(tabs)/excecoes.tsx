@@ -127,7 +127,7 @@ export default function Excecoes() {
   const c = useCarga(listarExcecoes);
   return (
     <Tela titulo="Exceções" subtitulo="Ocorrências sem emissão automática de OS">
-      <Estado {...c} textoVazio="Nenhuma exceção pendente. Tudo emitido!">
+      <Estado {...c} textoVazio="Nenhuma exceção pendente: as ocorrências de rotina já viraram OS.">
         {(lista) => lista.map((o) => <CartaoExcecao key={o.id} o={o} gestor={usuario!.nome} />)}
       </Estado>
     </Tela>
