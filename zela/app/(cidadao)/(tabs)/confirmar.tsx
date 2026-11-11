@@ -40,7 +40,7 @@ export default function Confirmar() {
               <Foto rotulo="Antes" uri={o.fotoAntesUrl} altura={120} />
               <Text style={styles.titulo}>{o.titulo}</Text>
               <Text style={styles.meta}>
-                {o.endereco} · {formatarDistancia(o.distanciaM)}
+                {o.endereco}, a {formatarDistancia(o.distanciaM)} de você
               </Text>
               <Text style={styles.pergunta}>Ainda está aqui?</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>

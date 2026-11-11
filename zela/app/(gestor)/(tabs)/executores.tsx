@@ -26,7 +26,7 @@ export default function Executores() {
             <Card key={e.id}>
               <Text style={textos.tituloCartao}>{e.nome}</Text>
               <Text style={textos.meta}>
-                {TIPOS[e.tipo]} · {e.regiao}
+                {TIPOS[e.tipo]} na região {e.regiao}
               </Text>
               <Text style={textos.meta}>{e.contrato}</Text>
               <View style={styles.metricas}>

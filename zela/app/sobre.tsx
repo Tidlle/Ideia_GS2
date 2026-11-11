@@ -22,7 +22,7 @@ export default function Sobre() {
         <Text style={t} selectable accessibilityLabel={`Hash do commit ${COMMIT}`}>
           Commit: {COMMIT}
         </Text>
-        <Text style={t}>Global Solution 2026/2 · CitizenTech · FIAP</Text>
+        <Text style={t}>Global Solution 2026/2, CitizenTech, FIAP</Text>
       </Card>
       <Card>
         <Text style={{ ...t, fontFamily: fontes.textoNegrito }}>Integrantes</Text>

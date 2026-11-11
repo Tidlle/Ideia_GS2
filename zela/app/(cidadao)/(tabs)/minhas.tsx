@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { CartaoOcorrencia } from '../../../src/components/CartaoOcorrencia';
+import { CartaoOcorrencia, Grupo } from '../../../src/components/CartaoOcorrencia';
 import { Chips } from '../../../src/components/Chips';
 import { Estado } from '../../../src/components/Estado';
 import { Tela } from '../../../src/components/Tela';
@@ -25,7 +25,13 @@ export default function Minhas() {
     <Tela titulo="Minhas ocorrências">
       <Chips opcoes={FILTROS} selecionado={filtro} onChange={setFiltro} />
       <Estado {...c} dados={filtradas} textoVazio="Nenhuma ocorrência com esse filtro.">
-        {(lista) => lista.map((o) => <CartaoOcorrencia key={o.id} o={o} mostrarPrazo />)}
+        {(lista) => (
+          <Grupo>
+            {lista.map((o) => (
+              <CartaoOcorrencia key={o.id} o={o} mostrarPrazo />
+            ))}
+          </Grupo>
+        )}
       </Estado>
     </Tela>
   );

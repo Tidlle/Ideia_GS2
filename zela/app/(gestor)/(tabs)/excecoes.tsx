@@ -48,8 +48,10 @@ function CartaoExcecao({ o, gestor }: { o: Ocorrencia; gestor: string }) {
       <Foto rotulo="Antes" uri={o.fotoAntesUrl} altura={100} />
       <Text style={textos.tituloCartao}>{o.titulo}</Text>
       <Text style={textos.meta}>
-        {cat.nome} · {o.confirmacoesSim} confirmações ·{' '}
-        {cat.emissaoAutomatica ? 'rotina' : 'sem emissão automática'}
+        {cat.nome},{' '}
+        {o.confirmacoesSim === 1 ? '1 confirmação' : `${o.confirmacoesSim} confirmações`} dos
+        vizinhos.{' '}
+        {cat.emissaoAutomatica ? 'Categoria de rotina.' : 'Categoria sem emissão automática.'}
       </Text>
 
       {modo === null && (

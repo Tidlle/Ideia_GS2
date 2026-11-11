@@ -8,6 +8,7 @@ import { Tela } from '../../../src/components/Tela';
 import { useAuth } from '../../../src/context/AuthContext';
 import { useCarga } from '../../../src/hooks/useCarga';
 import { calcularIndicadores } from '../../../src/services/ordens';
+import { espacos } from '../../../src/theme/espacos';
 
 export default function Painel() {
   const router = useRouter();
@@ -18,13 +19,23 @@ export default function Painel() {
       <Estado {...c} textoVazio="Sem dados.">
         {([i]) => (
           <>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-              <Indicador valor={i.abertas} rotulo="OS abertas" />
-              <Indicador valor={i.atrasadas} rotulo="OS atrasadas" alerta={i.atrasadas > 0} />
-              <Indicador valor={`${i.prazosCumpridosPct}%`} rotulo="Prazos cumpridos" />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: espacos.md }}>
+              <Indicador valor={i.abertas} rotulo="OS abertas" contexto="em andamento agora" />
+              <Indicador
+                valor={i.atrasadas}
+                rotulo="OS atrasadas"
+                contexto={`de ${i.abertas} abertas`}
+                alerta={i.atrasadas > 0}
+              />
+              <Indicador
+                valor={`${i.prazosCumpridosPct}%`}
+                rotulo="Prazos cumpridos"
+                contexto="média dos contratos"
+              />
               <Indicador
                 valor={`${i.retrabalhoPct}%`}
                 rotulo="Retrabalho"
+                contexto="OS reprovadas ou contestadas"
                 alerta={i.retrabalhoPct > 10}
               />
             </View>

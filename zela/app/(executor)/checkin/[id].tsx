@@ -71,7 +71,10 @@ export default function Checkin() {
   }
 
   return (
-    <Tela titulo="Check-in no local" subtitulo={`${o.endereco} · raio máximo ${RAIO_CHECKIN_M} m`}>
+    <Tela
+      titulo="Check-in no local"
+      subtitulo={`${o.endereco}. Libera a execução a até ${RAIO_CHECKIN_M} m do local.`}
+    >
       <Botao
         titulo="Ler minha posição (GPS)"
         onPress={lerGPS}

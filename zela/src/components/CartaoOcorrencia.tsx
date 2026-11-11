@@ -1,47 +1,102 @@
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Children, ReactNode } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { db } from '../services/store';
 import { cores } from '../theme/cores';
+import { espacos, raio } from '../theme/espacos';
 import { textos } from '../theme/textos';
-import { fontes, tamanhos } from '../theme/tipografia';
 import { Ocorrencia } from '../types';
-import { descreverPrazo, formatarDistancia } from '../utils';
-import { Card } from './Card';
+import { formatarDistancia, situacaoPrazo } from '../utils';
 import { IconeCategoria } from './IconeCategoria';
+import { ReguaPrazo } from './ReguaPrazo';
 import { StatusBadge } from './StatusBadge';
 
-export function CartaoOcorrencia({ o, mostrarPrazo }: { o: Ocorrencia; mostrarPrazo?: boolean }) {
+/**
+ * Ocorrência como linha de lista. As listas do cidadão são leves (linhas num grupo só);
+ * os cartões com comprovante ficam para quem gerencia as OS.
+ */
+export function CartaoOcorrencia({
+  o,
+  mostrarPrazo,
+  mostrarDistancia,
+}: {
+  o: Ocorrencia;
+  mostrarPrazo?: boolean;
+  mostrarDistancia?: boolean;
+}) {
   const router = useRouter();
   const categoria = db.categorias.find((c) => c.id === o.categoriaId);
   const os = db.ordens.find((x) => x.id === o.osId);
-  const prazo = os ? descreverPrazo(os.prazoEtapa) : null;
+  const prazo = mostrarPrazo && os ? situacaoPrazo(os) : null;
+  const detalhe = [
+    categoria?.nome,
+    mostrarDistancia && o.distanciaM > 0 ? `a ${formatarDistancia(o.distanciaM)}` : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
   return (
-    <Card
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Abrir ocorrência: ${o.titulo}`}
       onPress={() => router.push(`/(cidadao)/ocorrencia/${o.id}` as never)}
-      rotulo={`Abrir ocorrência: ${o.titulo}`}
+      style={({ pressed }) => [styles.linha, pressed && { backgroundColor: cores.claro }]}
     >
-      <View style={styles.topo}>
-        <IconeCategoria nome={categoria?.nome} />
-        <Text style={styles.categoria}>{categoria?.nome}</Text>
-        <Text style={styles.dist}>{formatarDistancia(o.distanciaM)}</Text>
+      <View style={styles.icone}>
+        <IconeCategoria nome={categoria?.nome} tamanho={20} cor={cores.andamento} />
       </View>
-      <Text style={textos.tituloCartao}>{o.titulo}</Text>
-      <StatusBadge status={o.status} />
-      {mostrarPrazo && prazo && (
-        <Text style={[textos.prazo, prazo.atrasado && textos.atrasado]}>{prazo.texto}</Text>
-      )}
-    </Card>
+      <View style={styles.textos}>
+        <Text style={textos.tituloCartao}>{o.titulo}</Text>
+        {!!detalhe && <Text style={textos.meta}>{detalhe}</Text>}
+        <View style={{ marginTop: espacos.xs }}>
+          <StatusBadge status={o.status} />
+        </View>
+        {prazo && (
+          <View style={{ marginTop: espacos.xs }}>
+            <ReguaPrazo {...prazo} compacta />
+          </View>
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
+/** Agrupa linhas num único bloco com divisórias finas. */
+export function Grupo({ children }: { children: ReactNode }) {
+  const itens = Children.toArray(children);
+  return (
+    <View style={styles.grupo}>
+      {itens.map((filho, i) => (
+        <View key={i} style={i > 0 && styles.divisoria}>
+          {filho}
+        </View>
+      ))}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  topo: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  categoria: {
-    flex: 1,
-    fontFamily: fontes.textoMedio,
-    fontSize: tamanhos.legenda,
-    color: cores.link,
+  grupo: {
+    backgroundColor: cores.cartao,
+    borderRadius: raio.cartao,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    overflow: 'hidden',
   },
-  dist: { fontFamily: fontes.texto, fontSize: tamanhos.legenda, color: cores.textoSuave },
+  divisoria: { borderTopWidth: 1, borderTopColor: cores.borda },
+  linha: {
+    flexDirection: 'row',
+    gap: espacos.md,
+    padding: espacos.lg,
+    backgroundColor: cores.cartao,
+  },
+  icone: {
+    width: 40,
+    height: 40,
+    borderRadius: raio.pilula,
+    backgroundColor: cores.andamentoFundo,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textos: { flex: 1, gap: 2 },
 });

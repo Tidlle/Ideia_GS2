@@ -4,6 +4,7 @@ import { Tabs } from 'expo-router';
 import { cores } from '../theme/cores';
 import { fontes, tamanhos } from '../theme/tipografia';
 import { CabecalhoAcoes } from './CabecalhoAcoes';
+import { Marca } from './Marca';
 
 interface Aba {
   nome: string;
@@ -22,6 +23,9 @@ export function AreaTabs({ abas }: Props) {
         headerStyle: { backgroundColor: cores.escuro },
         headerTintColor: cores.claro,
         headerTitleStyle: { fontFamily: fontes.titulo },
+        // O título da tela já está na página; o cabeçalho das abas leva a marca.
+        headerTitle: () => <Marca tamanho={24} comNome />,
+        headerTitleAlign: 'left',
         headerRight: () => <CabecalhoAcoes />,
         tabBarActiveTintColor: cores.link,
         tabBarInactiveTintColor: cores.textoSuave,
