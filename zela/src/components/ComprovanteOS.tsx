@@ -8,6 +8,7 @@ import { textos } from '../theme/textos';
 import { Categoria, Executor, Ocorrencia, OrdemServico } from '../types';
 import { formatarData, formatarProtocolo, situacaoPrazo } from '../utils';
 import { Carimbo } from './Carimbo';
+import { IconeCategoria } from './IconeCategoria';
 import { ReguaPrazo } from './ReguaPrazo';
 import { Serrilha } from './Serrilha';
 import { StatusBadge } from './StatusBadge';
@@ -63,7 +64,12 @@ export function ComprovanteOS({
       <View style={styles.corpo}>
         <View style={styles.topo}>
           <Text style={textos.rotuloInfo}>Protocolo</Text>
-          {!!categoria && <Text style={styles.categoria}>{categoria.nome}</Text>}
+          {!!categoria && (
+            <View style={styles.categoriaLinha}>
+              <IconeCategoria nome={categoria.nome} tamanho={16} />
+              <Text style={styles.categoria}>{categoria.nome}</Text>
+            </View>
+          )}
         </View>
         <Text style={textos.numero} accessibilityLabel={`Protocolo ${o.id}`}>
           {formatarProtocolo(o.id, o.criadaEm)}
@@ -125,6 +131,7 @@ const styles = StyleSheet.create({
   },
   corpo: { padding: espacos.lg, paddingBottom: espacos.md, gap: espacos.xs },
   topo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  categoriaLinha: { flexDirection: 'row', alignItems: 'center', gap: espacos.xs },
   categoria: { ...textos.rotuloInfo, marginTop: 0, color: cores.link },
   local: { flexDirection: 'row', alignItems: 'center', gap: espacos.xs },
   canhoto: {

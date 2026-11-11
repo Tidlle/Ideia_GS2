@@ -1,56 +1,74 @@
+import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { cores } from '../theme/cores';
 import { raio } from '../theme/espacos';
-import { fontes, tamanhos } from '../theme/tipografia';
+import { fontes, linhas, tamanhos } from '../theme/tipografia';
 
-type Tom = 'verde' | 'laranja' | 'urgente' | 'neutro';
+type Tom = 'andamento' | 'atencao' | 'sucesso' | 'perigo' | 'inativo';
+type Icone = keyof typeof Ionicons.glyphMap;
 
-const MAPA: Record<string, { texto: string; tom: Tom }> = {
+/**
+ * Cada status tem texto, tom e ícone. O tom diz o que o status significa para quem lê:
+ * andamento (seguindo o fluxo), atenção (alguém precisa agir), sucesso (resolvido),
+ * perigo (risco ou atraso) e inativo (saiu do fluxo).
+ */
+const MAPA: Record<string, { texto: string; tom: Tom; icone: Icone }> = {
   // ocorrência
-  REPORTADA: { texto: 'Reportada', tom: 'neutro' },
-  EM_TRIAGEM: { texto: 'Em triagem', tom: 'neutro' },
-  AGUARDANDO_CONFIRMACAO: { texto: 'Aguardando confirmação', tom: 'laranja' },
-  CONFIRMADA: { texto: 'Confirmada', tom: 'verde' },
-  EM_ATENDIMENTO: { texto: 'Em atendimento', tom: 'verde' },
-  RESOLVIDA: { texto: 'Resolvida', tom: 'verde' },
-  URGENTE: { texto: 'Urgente', tom: 'urgente' },
-  DESCARTADA: { texto: 'Descartada', tom: 'neutro' },
-  ENCAMINHADA: { texto: 'Encaminhada', tom: 'neutro' },
+  REPORTADA: { texto: 'Reportada', tom: 'andamento', icone: 'document-text-outline' },
+  EM_TRIAGEM: { texto: 'Em triagem', tom: 'andamento', icone: 'sparkles-outline' },
+  AGUARDANDO_CONFIRMACAO: {
+    texto: 'Aguardando confirmação',
+    tom: 'atencao',
+    icone: 'people-outline',
+  },
+  CONFIRMADA: { texto: 'Confirmada', tom: 'andamento', icone: 'people' },
+  EM_ATENDIMENTO: { texto: 'Em atendimento', tom: 'andamento', icone: 'construct-outline' },
+  RESOLVIDA: { texto: 'Resolvida', tom: 'sucesso', icone: 'checkmark-circle' },
+  URGENTE: { texto: 'Urgente', tom: 'perigo', icone: 'warning' },
+  DESCARTADA: { texto: 'Descartada', tom: 'inativo', icone: 'close-circle-outline' },
+  ENCAMINHADA: { texto: 'Encaminhada', tom: 'inativo', icone: 'arrow-redo-outline' },
   // OS
-  EMITIDA: { texto: 'Emitida', tom: 'laranja' },
-  ACEITA: { texto: 'Aceita', tom: 'verde' },
-  RECUSADA: { texto: 'Recusada', tom: 'urgente' },
-  EM_EXECUCAO: { texto: 'Em execução', tom: 'verde' },
-  CONCLUIDA: { texto: 'Concluída', tom: 'verde' },
-  VALIDADA: { texto: 'Validada', tom: 'verde' },
-  ENCERRADA: { texto: 'Encerrada', tom: 'neutro' },
-  REABERTA: { texto: 'Reaberta (retrabalho)', tom: 'laranja' },
-  ESCALADA: { texto: 'Escalada', tom: 'urgente' },
-  ATRASADA: { texto: 'Atrasada', tom: 'urgente' },
+  EMITIDA: { texto: 'Emitida', tom: 'andamento', icone: 'paper-plane-outline' },
+  ACEITA: { texto: 'Aceita', tom: 'andamento', icone: 'thumbs-up-outline' },
+  RECUSADA: { texto: 'Recusada', tom: 'perigo', icone: 'close-circle' },
+  EM_EXECUCAO: { texto: 'Em execução', tom: 'andamento', icone: 'hammer-outline' },
+  CONCLUIDA: { texto: 'Concluída', tom: 'atencao', icone: 'checkmark-done-outline' },
+  VALIDADA: { texto: 'Validada', tom: 'sucesso', icone: 'shield-checkmark-outline' },
+  ENCERRADA: { texto: 'Encerrada', tom: 'inativo', icone: 'archive-outline' },
+  REABERTA: { texto: 'Reaberta (retrabalho)', tom: 'atencao', icone: 'refresh-outline' },
+  ESCALADA: { texto: 'Escalada', tom: 'perigo', icone: 'trending-up-outline' },
+  ATRASADA: { texto: 'Atrasada', tom: 'perigo', icone: 'time-outline' },
 };
 
 export const TONS: Record<Tom, { fundo: string; cor: string; forte: string }> = {
-  verde: { fundo: cores.verdeFundo, cor: cores.verdeEscuro, forte: cores.verde },
-  laranja: { fundo: cores.laranjaFundo, cor: cores.laranjaEscuro, forte: cores.laranja },
-  urgente: { fundo: cores.urgenteFundo, cor: cores.urgente, forte: cores.urgente },
-  neutro: { fundo: cores.neutroFundo, cor: cores.textoSuave, forte: cores.textoSuave },
+  andamento: { fundo: cores.andamentoFundo, cor: cores.andamento, forte: cores.andamento },
+  atencao: { fundo: cores.atencaoFundo, cor: cores.atencao, forte: cores.atencaoForte },
+  sucesso: { fundo: cores.sucessoFundo, cor: cores.sucesso, forte: cores.marca },
+  perigo: { fundo: cores.perigoFundo, cor: cores.perigo, forte: cores.perigo },
+  inativo: { fundo: cores.inativoFundo, cor: cores.inativo, forte: cores.inativo },
 };
 
-/** Texto e tom de um status (usado pelo selo e pela linha do tempo). */
+/** Texto, ícone e cores de um status (usado pelo selo, pelo carimbo e pela linha do tempo). */
 export function infoStatus(status: string) {
-  const m = MAPA[status] ?? { texto: status, tom: 'neutro' as Tom };
-  return { texto: m.texto, ...TONS[m.tom] };
+  const m = MAPA[status] ?? {
+    texto: status,
+    tom: 'inativo' as Tom,
+    icone: 'ellipse-outline' as Icone,
+  };
+  return { texto: m.texto, icone: m.icone, ...TONS[m.tom] };
 }
 
-/** Sempre mostra o texto do status: a cor nunca é o único indicador. */
+/** Selo de status: ícone e texto juntos, para que a cor nunca seja o único indicador. */
 export function StatusBadge({ status }: { status: string }) {
   const t = infoStatus(status);
   return (
     <View
       style={[styles.badge, { backgroundColor: t.fundo }]}
+      accessible
       accessibilityLabel={`Status: ${t.texto}`}
     >
+      <Ionicons name={t.icone} size={13} color={t.cor} />
       <Text style={[styles.texto, { color: t.cor }]}>{t.texto}</Text>
     </View>
   );
@@ -59,9 +77,17 @@ export function StatusBadge({ status }: { status: string }) {
 const styles = StyleSheet.create({
   badge: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingLeft: 8,
+    paddingRight: 10,
     paddingVertical: 4,
     borderRadius: raio.pilula,
   },
-  texto: { fontFamily: fontes.textoNegrito, fontSize: tamanhos.legenda },
+  texto: {
+    fontFamily: fontes.textoNegrito,
+    fontSize: tamanhos.legenda,
+    lineHeight: linhas.legenda,
+  },
 });

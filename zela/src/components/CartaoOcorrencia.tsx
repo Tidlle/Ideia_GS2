@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -9,6 +8,7 @@ import { fontes, tamanhos } from '../theme/tipografia';
 import { Ocorrencia } from '../types';
 import { descreverPrazo, formatarDistancia } from '../utils';
 import { Card } from './Card';
+import { IconeCategoria } from './IconeCategoria';
 import { StatusBadge } from './StatusBadge';
 
 export function CartaoOcorrencia({ o, mostrarPrazo }: { o: Ocorrencia; mostrarPrazo?: boolean }) {
@@ -22,11 +22,7 @@ export function CartaoOcorrencia({ o, mostrarPrazo }: { o: Ocorrencia; mostrarPr
       rotulo={`Abrir ocorrência: ${o.titulo}`}
     >
       <View style={styles.topo}>
-        <Ionicons
-          name={(categoria?.icone ?? 'help-outline') as keyof typeof Ionicons.glyphMap}
-          size={18}
-          color={cores.link}
-        />
+        <IconeCategoria nome={categoria?.nome} />
         <Text style={styles.categoria}>{categoria?.nome}</Text>
         <Text style={styles.dist}>{formatarDistancia(o.distanciaM)}</Text>
       </View>
